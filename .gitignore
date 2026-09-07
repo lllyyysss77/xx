@@ -43,3 +43,5 @@ start_verify.log
 uploads/
 _dirty_data_backup_*.json
 _dbbak_*.json
+.cozeproj/reduction
+.codegraph
