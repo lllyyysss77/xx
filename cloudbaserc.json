@@ -1,0 +1,6 @@
+{
+  "envId": "kaifa-d1gyq07zdce31e09c",
+  "cloudrun": {
+    "name": "election-backend"
+  }
+}

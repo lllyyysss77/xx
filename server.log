@@ -1,0 +1,20 @@
+{"level":30,"time":1788469719278,"pid":30519,"hostname":"ircoco","msg":"Server listening at http://127.0.0.1:3100"}
+{"level":30,"time":1788469763401,"pid":30519,"hostname":"ircoco","reqId":"req-1","req":{"method":"GET","url":"/health","host":"127.0.0.1:3100","remoteAddress":"127.0.0.1","remotePort":45054},"msg":"incoming request"}
+(node:30519) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"level":30,"time":1788469765245,"pid":30519,"hostname":"ircoco","reqId":"req-1","res":{"statusCode":200},"responseTime":1843.6292729999986,"msg":"request completed"}
+{"level":30,"time":1788469765270,"pid":30519,"hostname":"ircoco","reqId":"req-2","req":{"method":"HEAD","url":"/health","host":"127.0.0.1:3100","remoteAddress":"127.0.0.1","remotePort":45056},"msg":"incoming request"}
+{"level":30,"time":1788469765530,"pid":30519,"hostname":"ircoco","reqId":"req-2","res":{"statusCode":200},"responseTime":260.10329599999386,"msg":"request completed"}
+{"level":30,"time":1788469811667,"pid":30519,"hostname":"ircoco","reqId":"req-3","req":{"method":"GET","url":"/health","host":"127.0.0.1:3100","remoteAddress":"127.0.0.1","remotePort":47268},"msg":"incoming request"}
+{"level":30,"time":1788469813471,"pid":30519,"hostname":"ircoco","reqId":"req-3","res":{"statusCode":200},"responseTime":1804.4574490000086,"msg":"request completed"}
+{"level":30,"time":1788470007972,"pid":30519,"hostname":"ircoco","reqId":"req-4","req":{"method":"GET","url":"/health","host":"127.0.0.1:3100","remoteAddress":"127.0.0.1","remotePort":36490},"msg":"incoming request"}
+{"level":30,"time":1788470009790,"pid":30519,"hostname":"ircoco","reqId":"req-4","res":{"statusCode":200},"responseTime":1817.5301259999978,"msg":"request completed"}
+{"level":30,"time":1788470327816,"pid":30519,"hostname":"ircoco","reqId":"req-5","req":{"method":"GET","url":"/health","host":"127.0.0.1:3100","remoteAddress":"127.0.0.1","remotePort":46336},"msg":"incoming request"}
+{"level":30,"time":1788470330220,"pid":30519,"hostname":"ircoco","reqId":"req-5","res":{"statusCode":200},"responseTime":2403.7450680000475,"msg":"request completed"}

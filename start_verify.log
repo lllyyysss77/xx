@@ -1,0 +1,10 @@
+[Port Switch] 默认端口 3100 被占用，后端已自动平滑切换至新端口: 3102
+{"level":30,"time":1788769611620,"pid":28124,"hostname":"ircoco","msg":"Server listening at http://127.0.0.1:3102"}
+{"level":30,"time":1788769644721,"pid":28124,"hostname":"ircoco","reqId":"req-1","req":{"method":"POST","url":"/auth/admin/login","host":"127.0.0.1:3102","remoteAddress":"127.0.0.1","remotePort":63369},"msg":"incoming request"}
+{"level":30,"time":1788769645042,"pid":28124,"hostname":"ircoco","reqId":"req-1","res":{"statusCode":200},"responseTime":320.4369000000006,"msg":"request completed"}
+{"level":30,"time":1788769660186,"pid":28124,"hostname":"ircoco","reqId":"req-2","req":{"method":"GET","url":"/admin/election-fiefs","host":"127.0.0.1:3102","remoteAddress":"127.0.0.1","remotePort":64405},"msg":"incoming request"}
+{"level":30,"time":1788769660308,"pid":28124,"hostname":"ircoco","reqId":"req-2","res":{"statusCode":200},"responseTime":121.76469999999972,"msg":"request completed"}
+{"level":30,"time":1788769660330,"pid":28124,"hostname":"ircoco","reqId":"req-3","req":{"method":"GET","url":"/admin/proposals","host":"127.0.0.1:3102","remoteAddress":"127.0.0.1","remotePort":64407},"msg":"incoming request"}
+{"level":30,"time":1788769660340,"pid":28124,"hostname":"ircoco","reqId":"req-3","res":{"statusCode":200},"responseTime":8.950799999998708,"msg":"request completed"}
+{"level":30,"time":1788769660347,"pid":28124,"hostname":"ircoco","reqId":"req-4","req":{"method":"GET","url":"/admin/announcements","host":"127.0.0.1:3102","remoteAddress":"127.0.0.1","remotePort":64408},"msg":"incoming request"}
+{"level":30,"time":1788769660359,"pid":28124,"hostname":"ircoco","reqId":"req-4","res":{"statusCode":200},"responseTime":11.68920000000071,"msg":"request completed"}

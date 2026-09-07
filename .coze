@@ -1,0 +1,10 @@
+[project]
+requires = ["nodejs-24"]
+
+[dev]
+build = ["pnpm", "install"]
+run = ["sh", "-c", "node --env-file=.env --import tsx/esm src/server.ts"]
+
+[deploy]
+build = ["sh", "-c", "pnpm install && pnpm run build"]
+run = ["sh", "-c", "node --env-file=.env dist/server.js"]

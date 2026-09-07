@@ -1,0 +1,946 @@
+{
+  "meta": {
+    "source": "docs/01-标准表格物料/城厢区村居换届系统-飞书导入包.xlsx",
+    "generated_by": "政务基础数据清洗专员",
+    "counts": {
+      "organizations": 122,
+      "village_committee": 93,
+      "community_committee": 29,
+      "positions": 4,
+      "material_types": 2
+    },
+    "town_distribution": {
+      "东海镇": 13,
+      "凤凰山街道": 9,
+      "华亭镇": 35,
+      "常太镇": 28,
+      "灵川镇": 15,
+      "霞林街道": 11,
+      "龙桥街道": 11
+    },
+    "rejected_toxins": [
+      [
+        "boss",
+        "城厢区换届选举平台",
+        "fake platform org"
+      ]
+    ],
+    "notes": "positions 为标准岗位目录（依据文件中真实 pos_type 及换届规范提炼）；materials.mat_type 在源包中为报名/提名方式（个人自荐、组织推荐），源包未含身份证/简历/无犯罪证明等文档级材料类型，故未编造。已严格隔离 voters 与 election_results。"
+  },
+  "organizations": [
+    {
+      "slug": "s-jiankou",
+      "name": "涧口社区居委会",
+      "town": "华亭镇",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-houshan",
+      "name": "后山村委会",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-yanshou",
+      "name": "延寿村委会",
+      "town": "龙桥街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-jingli",
+      "name": "径里村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-dongjin",
+      "name": "东进村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-shanmenli",
+      "name": "山门里村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-kezhu",
+      "name": "柯朱村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xiawei",
+      "name": "下尾村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-taihu",
+      "name": "太湖村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-zhangbian",
+      "name": "张边村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-qingshan",
+      "name": "青山村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-bangtou",
+      "name": "榜头村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-shufeng",
+      "name": "书峰村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-yunzhuang",
+      "name": "云庄村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xidun",
+      "name": "西墩村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-guishan",
+      "name": "桂山村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-aizao",
+      "name": "硋灶村委会",
+      "town": "灵川镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-zhaoche",
+      "name": "照车村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-shanmen",
+      "name": "山门村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xiashan",
+      "name": "霞山村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-dangcheng",
+      "name": "党城村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-guoxi",
+      "name": "过溪村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xibei",
+      "name": "溪北村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-zhangji",
+      "name": "长基村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-lingxia",
+      "name": "岭下村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-houshan2",
+      "name": "候山村委会",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-dongsha",
+      "name": "东沙村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-donghai",
+      "name": "东海村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-shangtu",
+      "name": "上图村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-caicuo",
+      "name": "蔡厝村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xihuang",
+      "name": "西黄村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-dongzhu",
+      "name": "东朱村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-pingyang",
+      "name": "坪洋村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xicuo",
+      "name": "西厝村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-caiting",
+      "name": "蔡亭村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-dabu",
+      "name": "大埔村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-shangting",
+      "name": "上亭村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-lijiao",
+      "name": "利角村委会",
+      "town": "东海镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j1",
+      "name": "龙桥街道社区占位1",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j2",
+      "name": "龙桥街道社区占位2",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j3",
+      "name": "龙桥街道社区占位3",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j4",
+      "name": "龙桥街道社区占位4",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j5",
+      "name": "龙桥街道社区占位5",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j6",
+      "name": "龙桥街道社区占位6",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j7",
+      "name": "龙桥街道社区占位7",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lq-j8",
+      "name": "龙桥街道社区占位8",
+      "town": "龙桥街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-lq-c1",
+      "name": "龙桥街道村占位1",
+      "town": "龙桥街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-lq-c2",
+      "name": "龙桥街道村占位2",
+      "town": "龙桥街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-fhs-j1",
+      "name": "凤凰山街道社区占位1",
+      "town": "凤凰山街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-fhs-j2",
+      "name": "凤凰山街道社区占位2",
+      "town": "凤凰山街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-fhs-j3",
+      "name": "凤凰山街道社区占位3",
+      "town": "凤凰山街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-fhs-j4",
+      "name": "凤凰山街道社区占位4",
+      "town": "凤凰山街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-fhs-j5",
+      "name": "凤凰山街道社区占位5",
+      "town": "凤凰山街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-fhs-j6",
+      "name": "凤凰山街道社区占位6",
+      "town": "凤凰山街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-fhs-c1",
+      "name": "凤凰山街道村占位1",
+      "town": "凤凰山街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-fhs-c2",
+      "name": "凤凰山街道村占位2",
+      "town": "凤凰山街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-fhs-c3",
+      "name": "凤凰山街道村占位3",
+      "town": "凤凰山街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j1",
+      "name": "霞林街道社区占位1",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j2",
+      "name": "霞林街道社区占位2",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j3",
+      "name": "霞林街道社区占位3",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j4",
+      "name": "霞林街道社区占位4",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j5",
+      "name": "霞林街道社区占位5",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j6",
+      "name": "霞林街道社区占位6",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j7",
+      "name": "霞林街道社区占位7",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j8",
+      "name": "霞林街道社区占位8",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-xl-j9",
+      "name": "霞林街道社区占位9",
+      "town": "霞林街道",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xl-c1",
+      "name": "霞林街道村占位1",
+      "town": "霞林街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-xl-c2",
+      "name": "霞林街道村占位2",
+      "town": "霞林街道",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-ht-j1",
+      "name": "华亭镇社区占位1",
+      "town": "华亭镇",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-ht-j2",
+      "name": "华亭镇社区占位2",
+      "town": "华亭镇",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c1",
+      "name": "华亭镇村占位1",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c2",
+      "name": "华亭镇村占位2",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c3",
+      "name": "华亭镇村占位3",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c4",
+      "name": "华亭镇村占位4",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c5",
+      "name": "华亭镇村占位5",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c6",
+      "name": "华亭镇村占位6",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c7",
+      "name": "华亭镇村占位7",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c8",
+      "name": "华亭镇村占位8",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c9",
+      "name": "华亭镇村占位9",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c10",
+      "name": "华亭镇村占位10",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c11",
+      "name": "华亭镇村占位11",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c12",
+      "name": "华亭镇村占位12",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c13",
+      "name": "华亭镇村占位13",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c14",
+      "name": "华亭镇村占位14",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c15",
+      "name": "华亭镇村占位15",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c16",
+      "name": "华亭镇村占位16",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c17",
+      "name": "华亭镇村占位17",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c18",
+      "name": "华亭镇村占位18",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c19",
+      "name": "华亭镇村占位19",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c20",
+      "name": "华亭镇村占位20",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c21",
+      "name": "华亭镇村占位21",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c22",
+      "name": "华亭镇村占位22",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c23",
+      "name": "华亭镇村占位23",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c24",
+      "name": "华亭镇村占位24",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c25",
+      "name": "华亭镇村占位25",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c26",
+      "name": "华亭镇村占位26",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c27",
+      "name": "华亭镇村占位27",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c28",
+      "name": "华亭镇村占位28",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c29",
+      "name": "华亭镇村占位29",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c30",
+      "name": "华亭镇村占位30",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ht-c31",
+      "name": "华亭镇村占位31",
+      "town": "华亭镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-lc-j1",
+      "name": "灵川镇社区占位1",
+      "town": "灵川镇",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-ct-j1",
+      "name": "常太镇社区占位1",
+      "town": "常太镇",
+      "type": "community_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c1",
+      "name": "常太镇村占位1",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c2",
+      "name": "常太镇村占位2",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c3",
+      "name": "常太镇村占位3",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c4",
+      "name": "常太镇村占位4",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c5",
+      "name": "常太镇村占位5",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c6",
+      "name": "常太镇村占位6",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c7",
+      "name": "常太镇村占位7",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c8",
+      "name": "常太镇村占位8",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c9",
+      "name": "常太镇村占位9",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c10",
+      "name": "常太镇村占位10",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c11",
+      "name": "常太镇村占位11",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c12",
+      "name": "常太镇村占位12",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c13",
+      "name": "常太镇村占位13",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c14",
+      "name": "常太镇村占位14",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c15",
+      "name": "常太镇村占位15",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c16",
+      "name": "常太镇村占位16",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c17",
+      "name": "常太镇村占位17",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "v-ct-c18",
+      "name": "常太镇村占位18",
+      "town": "常太镇",
+      "type": "village_committee",
+      "status": "active"
+    },
+    {
+      "slug": "s-dh-j1",
+      "name": "东海镇社区占位1",
+      "town": "东海镇",
+      "type": "community_committee",
+      "status": "active"
+    }
+  ],
+  "positions": [
+    {
+      "pos_type": "主任",
+      "pos_quota": 1,
+      "pos_quota_range": [
+        1,
+        1
+      ],
+      "pos_gender": "any",
+      "pos_desc": "主持村（居）民委员会全面工作"
+    },
+    {
+      "pos_type": "副主任",
+      "pos_quota": 1,
+      "pos_quota_range": [
+        1,
+        2
+      ],
+      "pos_gender": "any",
+      "pos_desc": "协助主任开展工作，分管指定领域"
+    },
+    {
+      "pos_type": "委员",
+      "pos_quota": 5,
+      "pos_quota_range": [
+        3,
+        5
+      ],
+      "pos_gender": "any",
+      "pos_desc": "分管具体事务（含妇女成员专职专选保障）"
+    },
+    {
+      "pos_type": "妇女委员",
+      "pos_quota": 1,
+      "pos_quota_range": [
+        1,
+        1
+      ],
+      "pos_gender": "female",
+      "pos_desc": "女性专岗，保障委员会中至少一名女性成员"
+    }
+  ],
+  "materials": {
+    "attachment_model": "multi_attachment",
+    "description": "每位候选人可按岗位提交多份报名材料附件",
+    "types": [
+      {
+        "mat_type": "个人自荐",
+        "mat_desc": "候选人报名/提名方式",
+        "required": true,
+        "multiple": true
+      },
+      {
+        "mat_type": "组织推荐",
+        "mat_desc": "组织推荐提名方式",
+        "required": true,
+        "multiple": true
+      }
+    ]
+  }
+}
