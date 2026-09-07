@@ -16,7 +16,7 @@ export async function materialsRoutes(app: FastifyInstance) {
       try {
         await c.query('begin');
         u = (await c.query('insert into users(phone,password_hash,display_name) values($1,$2,$3) returning id', [b.phone, await passwordHash('123456'), b.name ?? b.phone])).rows[0];
-        await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3)', [u.id, req.auth!.organizationId, 'candidate']);
+        await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id, organization_id) do nothing', [u.id, req.auth!.organizationId, 'candidate']);
         await c.query('commit');
       } catch (e) { await c.query('rollback'); throw e; } finally { c.release(); }
     }

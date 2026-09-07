@@ -113,7 +113,7 @@ const ACCOUNTS = [
 ];
 for (const [phone,name,slug,role] of ACCOUNTS) {
   const u = (await pool.query("insert into users(phone,password_hash,display_name) values($1,$2,$3) on conflict (phone) do update set password_hash=$2,display_name=$3 returning id",[phone,PWD,name])).rows[0];
-  await pool.query("insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id) do update set organization_id=$2,role=$3",[u.id,orgIds[slug],role]);
+  await pool.query("insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id,organization_id) do update set role=$3",[u.id,orgIds[slug],role]);
 }
 console.log('演示账号已填充：', ACCOUNTS.length, '个（密码均 123456）');
 

@@ -33,7 +33,7 @@ export async function authRoutes(app: FastifyInstance) {
     try {
       await c.query('begin');
       const u = (await c.query('insert into users(phone,password_hash,display_name) values($1,$2,$3) returning id', [b.phone, await passwordHash(b.password), b.displayName])).rows[0];
-      await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3)', [u.id, b.organizationId, role]);
+      await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id, organization_id) do nothing', [u.id, b.organizationId, role]);
       await c.query('commit');
       return rep.code(201).send({ userId: u.id, organizationId: b.organizationId });
     } catch (e) { await c.query('rollback'); throw e; } finally { c.release(); }

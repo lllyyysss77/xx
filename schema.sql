@@ -29,10 +29,11 @@ create table if not exists users (
 -- 归属关系：一人一归属地一角色（归属地天然绑死）
 create table if not exists memberships (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid not null unique references users(id) on delete cascade,
+  user_id uuid not null references users(id) on delete cascade,
   organization_id uuid not null references organizations(id),
   role text not null check (role in ('platform_admin','sub_admin','editor','reviewer','candidate')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  unique (user_id, organization_id)
 );
 
 -- 开账号（平台超管用）

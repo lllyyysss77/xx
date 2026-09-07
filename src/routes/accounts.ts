@@ -32,7 +32,7 @@ export async function accountsRoutes(app: FastifyInstance) {
     try {
       await c.query('begin');
       const u = (await c.query('insert into users(phone,password_hash,display_name) values($1,$2,$3) returning id', [b.phone, await passwordHash(b.password), b.displayName ?? b.phone])).rows[0];
-      await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3)', [u.id, b.organizationId, b.role]);
+      await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id, organization_id) do nothing', [u.id, b.organizationId, b.role]);
       await c.query('commit');
       return rep.code(201).send({ userId: u.id, organizationId: b.organizationId, role: b.role });
     } catch (e) { await c.query('rollback'); throw e; } finally { c.release(); }
@@ -122,12 +122,12 @@ export async function accountsRoutes(app: FastifyInstance) {
             if (a.name) await c.query('update users set display_name=$1 where id=$2', [a.name, exist.id]);
             updated.push(a.phone);
           } else {
-            await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3)', [exist.id, b.orgId, a.roleKey]);
+            await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id, organization_id) do nothing', [exist.id, b.orgId, a.roleKey]);
             updated.push(a.phone);
           }
         } else {
           const u = (await c.query('insert into users(phone,password_hash,display_name) values($1,$2,$3) returning id', [a.phone, await passwordHash(a.password), a.name || a.phone])).rows[0];
-          await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3)', [u.id, b.orgId, a.roleKey]);
+          await c.query('insert into memberships(user_id,organization_id,role) values($1,$2,$3) on conflict (user_id, organization_id) do nothing', [u.id, b.orgId, a.roleKey]);
           created.push(a.phone);
         }
       }
