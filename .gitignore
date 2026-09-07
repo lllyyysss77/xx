@@ -2,3 +2,44 @@
 .env
 .env.*
 !.env.example
+
+# 依赖
+node_modules/
+.pnpm-store/
+
+# 构建产物
+dist/
+*.tsbuildinfo
+
+# 日志
+*.log
+logs/
+
+# 数据库备份/dump（易含真实数据与敏感信息，禁止入库）
+db-backup/
+_backup/
+_dbbak_*.sql
+neon_dump.sql
+*.dump
+*.bak
+
+# 运行时
+.preview
+nohup.out
+# 运行时/日志残留（误提交的历史文件，已移出跟踪）
+*.log
+debug-run.err.log
+debug-run.log
+hook-received.log
+server-e2e.log
+server-run.err.log
+server-run.log
+server.log
+start.log
+start_verify.err.log
+start_verify.log
+
+# 本地上传/脏数据（含真实政务文件与软链接，禁止入库）
+uploads/
+_dirty_data_backup_*.json
+_dbbak_*.json
