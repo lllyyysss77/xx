@@ -1,0 +1,72 @@
+:root {
+  /* ── 城厢区村居换届选举系统 · 红金政务皮 Design Tokens ── */
+  --td-brand-color: #B22222;               /* 核心主红（中国红/印章红） */
+  --td-brand-color-focus: #8B1A1A;
+  --td-brand-color-active: #8B1A1A;
+  --td-brand-color-disabled: #EAAFAF;
+  --td-brand-color-light: #FDF4F4;          /* 柔和红晕 */
+  --td-brand-color-light-hover: #F9E2E2;
+  --td-brand-color-1: #FDF4F4;
+  --td-brand-color-2: #F9E2E2;
+  --td-brand-color-3: #F0BDBD;
+  --td-brand-color-4: #E59595;
+  --td-brand-color-5: #D86B6B;
+  --td-brand-color-6: #C94242;
+  --td-brand-color-7: #B22222;
+  --td-brand-color-8: #981919;
+  --td-brand-color-9: #7F1212;
+
+  /* 辅助赤金（政务金徽章、高亮指示） */
+  --gov-gold-color: #C8A45C;
+  --gov-gold-bg: #FAF6ED;
+  --gov-gold-border: #E8D3A5;
+
+  /* 宣纸底色与柔和材质 */
+  --td-bg-color-page: #FAF8F5;              /* 宣纸温润底色 */
+  --td-bg-color-container: #FFFFFF;
+  --td-radius-default: 6px;
+  --td-radius-large: 8px;
+}
+
+body {
+  margin: 0;
+  background-color: var(--td-bg-color-page);
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* 顶部与卡片精美微质感阴影 */
+.t-card {
+  border-radius: 8px !important;
+  border: 1px solid rgba(200, 164, 92, 0.2) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+}
+
+/* 表格头部微金质感 */
+.t-table__header tr {
+  background-color: #FAF8F5 !important;
+}
+.t-table th {
+  color: #555555 !important;
+  font-weight: 600 !important;
+}
+
+/* 选中项红底白字 */
+.t-menu__item.t-is-active:not(.t-is-opened) {
+  background-color: var(--td-brand-color-light) !important;
+  color: var(--td-brand-color) !important;
+  border-right: 3px solid var(--td-brand-color) !important;
+}
+

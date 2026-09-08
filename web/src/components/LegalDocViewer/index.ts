@@ -1,0 +1,1 @@
+export { LegalDocViewer } from './LegalDocViewer';

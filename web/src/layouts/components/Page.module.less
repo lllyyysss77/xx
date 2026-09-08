@@ -1,0 +1,12 @@
+.panel {
+  margin: 24px;
+  padding: 0;
+  /* overflow 置 visible：.panel 无高度约束、自身不滚动，auto 只会成为 position:sticky 的
+     最近滚动祖先并使其失效（明细页右栏工作台吸顶依赖此修复）。真滚动容器是 AppLayout 的
+     .sideContainer/.mixContent（flex:1 + overflow:auto），纵向滚动行为不受影响。 */
+  overflow: visible;
+}
+
+.breadcrumb {
+  margin-bottom: 8px;
+}

@@ -4,9 +4,14 @@
 村/居（村委会、居委会）换届选举的**政务内部管理系统后端**。村、社区两套 SOP 流程基本一致，仅选举细节与岗位有差异；以 **D 日（选举日）倒排** 驱动，一套 pipeline 复用，各村/社区仅数据内容不同。
 
 - 形态：Fastify 5 + TypeScript（tsx 直跑）+ PostgreSQL（Neon）+ zod 校验。
-- 端口：从 `DEPLOY_RUN_PORT`（沙箱/部署）读取，回退 `PORT`、再回退 3100。
+- 前端：`web/`（**React 18 + Vite 5 + TDesign + axios** 管理后台，注意不是 Vue）；`miniprogram/`（参选人小程序）。
+- **部署形态（2026-09-08 起）**：后端 Fastify 在生产环境**同源托管** `web/dist`（@fastify/static），单端口对外；
+  前端 API baseURL 用**同源相对路径**（`web/src/api/client.ts` 的 `API_BASE_URL` 默认空串），
+  本地 `vite dev` 经 `vite.config.js` 的 `server.proxy` 把 `/admin`、`/auth`、`/files`、`/health` 代理到后端。
+  ——彻底消除「前端写死 `http://127.0.0.1:3100` + 跨域」导致部署后所有接口/上传失败的根因。
+- 端口：从 `DEPLOY_RUN_PORT`（沙箱/部署）读取，回退 `PORT`、再回退 3100；监听 host 默认 `0.0.0.0`（可用 HOST 覆盖）。
 - 数据库连接：`DATABASE_URL` 环境变量（`.env`，**禁止入库真实密钥到 git**）。
-- 前端：`web/`（Vue 管理后台，端口 3003）；`miniprogram/`（参选人小程序）。本目录为纯 API 服务（无页面），`/` 对浏览器 302 到后台。
+- `/`：web/dist 存在时返回后台首页（SPA history 路由由 setNotFoundHandler 回退 index.html，/admin//auth//files//health 不回退仍返回 JSON）；无 dist 时返回 API 服务信息 JSON。
 
 ## 常用命令（仅用 pnpm）
 - 安装依赖：`pnpm install`
@@ -68,12 +73,34 @@ rebuild-db.mjs       仅本地/演练用：drop 全表重建 + seed（**严禁�
 - 新增 `POST /admin/proposals/sample-file`：提案阶段“新增岗位”样表附件上传（此时岗位/封地尚未建）。
 - 端口：`lib.ts` 读 `DEPLOY_RUN_PORT`；`package.json` 的 `seed:templates` 指向真实的 `seed-templates.mjs`。
 
+## 2026-09-08 文件上传链路修复（web ↔ api 同源化）
+起因：web 前端 `API_BASE_URL` 写死 `http://127.0.0.1:3100` 且跨域直连，部署到公网后浏览器请求指向用户本机，
+所有接口/上传/预览全挂；vite 未配 proxy；后端只监听 127.0.0.1。0 置信交叉审计后修复：
+- **同源托管**：后端注册 `@fastify/static` 托管 `web/dist`（`prefix:'/'`、`wildcard:false`），
+  `setNotFoundHandler` 对非 API 路径回退 `index.html`（SPA），`/admin`、`/auth`、`/files`、`/health`、`/ws` 仍返回 JSON 404。
+- **监听地址**：`app.listen` host 由写死 `127.0.0.1` 改为 `0.0.0.0`（HOST 可覆盖），否则容器外不可达。
+- **前端 baseURL**：`web/src/api/client.ts` 默认空串（同源相对路径），仅 `VITE_API_BASE_URL` 显式配置才跨域；
+  `getFileUrl` 随之变同源 `/files/:key`。
+- **vite 代理**：`web/vite.config.js` 新增 `server.proxy`（/admin /auth /files /health → 后端，target 读
+  `VITE_API_PROXY_TARGET` 或 `DEPLOY_RUN_PORT/PORT/3100`），本地 dev 与生产行为一致。
+- **上传 Content-Type**：移除 positions/announcements 手动设的 `'Content-Type':'multipart/form-data'`（缺 boundary），
+  统一由 client 拦截器对 FormData 删除该头、浏览器自动带 boundary。
+- **登录 500（sessions.id null）**：遗留库 `sessions` 主键 uuid 列**缺 `gen_random_uuid()` 默认值**
+  （`create table if not exists` 不修旧表）。代码侧 `lib.login` insert 显式传 `randomUUID()`；
+  并加幂等迁移 `migrations/20260908_fix_uuid_pk_defaults.sql`，给所有「单列 uuid 主键且无默认值」的列补 default。
+- **错误处理**：zod 校验失败此前返回 500（tsx/跨包下 `instanceof z.ZodError` 不稳），改为鸭子类型识别 `issues` 数组→400；
+  401/403/404/409 透传状态码。
+- `.coze`：dev/deploy build 均追加 `(cd web && pnpm install && pnpm exec vite build --mode release)` 产出 dist。
+- 契约核对（均一致，无需改）：上传返回 `{storageKey,fileName,mimeType,sizeBytes,relPath}`；
+  storageKey=32hex+ext，下载 `/files/:key` 正则 `^[a-f0-9]{32}(\.{1,10})?$` 匹配；
+  materials 两步走（/files/upload → POST /admin/materials/:id/file JSON）端点存在于 materials.ts；
+  FileList 组件已遍历 files[] 全量（非只渲染 files[0]）。
+
 ## 待办 / 后续（未在本次完成）
-- 候选人审核 R1~R4 列表需按 D 日派生各轮“起止审核日”并在前端表头展示（schema 的 `candidate_reviews` 仅存决定）。
-- “外送抄送邮箱 / 一键下载候选人全卷”接口尚未实现。
-- `memberships.user_id` 为 UNIQUE，一人仅能归属一个组织；若有干部跨村/社区兼任需放开为 (user_id,organization_id) 唯一。
-- 多附件预览前端只渲染 `files[0]`（后端已返回 `files[]` 全量）——属 web 前端问题。
+- “外送抄送邮箱”真实邮件/外发通道尚未对接（`POST /admin/candidates/:id/send` 目前是 webhook 对接点，需接实际通道）。
+- 小程序端 BASE_URL 仍写死 `127.0.0.1:3100`，需按小程序环境改配置（本次只修了 web + api）。
 - `rebuild-db.mjs` 依赖 `db-backup/...` 文件且含硬编码演示数据，仅限演练；生产用 `pnpm run migrate` + `migrate:file`。
+- web 打包有单 chunk >500kB 警告（tdesign 全量），可后续做按需引入/手动分包优化。
 
 ## 安全注意
 - `.env` 含 DATABASE_URL，不提交真实值；日志禁止打印密钥/token/完整请求体。

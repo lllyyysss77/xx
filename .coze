@@ -2,9 +2,9 @@
 requires = ["nodejs-24"]
 
 [dev]
-build = ["pnpm", "install"]
+build = ["sh", "-c", "pnpm install && (cd web && pnpm install && pnpm exec vite build --mode release)"]
 run = ["sh", "-c", "node --env-file=.env --import tsx/esm src/server.ts"]
 
 [deploy]
-build = ["sh", "-c", "pnpm install && pnpm run typecheck"]
+build = ["sh", "-c", "pnpm install && pnpm run typecheck && (cd web && pnpm install && pnpm exec vite build --mode release)"]
 run = ["sh", "-c", "node --env-file=.env --import tsx/esm src/server.ts"]

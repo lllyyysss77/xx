@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "api/*": ["src/api/*"],
+      "assets/*": ["src/assets/*"],
+      "components/*": ["src/components/*"],
+      "configs/*": ["src/configs/*"],
+      "layouts/*": ["src/layouts/*"],
+      "modules/*": ["src/modules/*"],
+      "pages/*": ["src/pages/*"],
+      "plugins": ["src/plugins/index.ts"],
+      "plugins/*": ["src/plugins/*"],
+      "stores/*": ["src/stores/*"],
+      "styles/*": ["src/styles/*"],
+      "utils/*": ["src/utils/*"],
+      "router/*": ["src/router/*"],
+      "types/*": ["src/types/*"]
+    }
+  },
+  "include": ["src"]
+}

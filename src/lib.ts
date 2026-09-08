@@ -3,7 +3,7 @@
  * 全部路由模块的公共依赖：DB 池 / 认证 / 权限 / 通知 / 日程计算 / 附件常量
  * 说明：仅做逻辑搬运，不做行为变更；类型声明合并到 FastifyRequest
  */
-import { createHash, randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
+import { createHash, randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import { mkdirSync, createWriteStream, promises as fsp } from 'node:fs';
 import { join } from 'node:path';
@@ -77,7 +77,8 @@ export const login = async (req: FastifyRequest, rep: FastifyReply, allowedRoles
   const u = (await pool.query("select u.id,u.password_hash,u.display_name,m.role,o.name as org_name,o.org_type,o.slug as org_slug from users u join memberships m on m.user_id=u.id and m.organization_id=$2 join organizations o on o.id=m.organization_id and o.status='active' where u.phone=$1 and u.status='active'", [b.phone, b.organizationId])).rows[0];
   if (!u || !allowedRoles.includes(u.role) || !(await passwordOk(b.password, u.password_hash))) return rep.code(401).send({ error: 'invalid_credentials_or_entrypoint' });
   const token = randomBytes(32).toString('base64url');
-  const s = (await pool.query("insert into sessions(user_id,organization_id,token_hash,expires_at) values($1,$2,$3,now()+interval '7 days') returning expires_at", [u.id, b.organizationId, hash(token)])).rows[0];
+  // 显式生成 session id：旧库 sessions.id 可能缺 gen_random_uuid() 默认值（被破坏的遗留表），不依赖 DB 默认
+  const s = (await pool.query("insert into sessions(id,user_id,organization_id,token_hash,expires_at) values($1,$2,$3,$4,now()+interval '7 days') returning expires_at", [randomUUID(), u.id, b.organizationId, hash(token)])).rows[0];
   // 登录即带回该角色在 role_permissions 中绑定的全部权限点，避免前端再用高权限接口二次拉取
   const permissions = (await pool.query('select permission from role_permissions where role_key=$1', [u.role])).rows.map((r: { permission: string }) => r.permission);
   return { token, expiresAt: s.expires_at, organizationId: b.organizationId, role: u.role, orgName: u.org_name, orgType: u.org_type, slug: u.org_slug, displayName: u.display_name, permissions };
