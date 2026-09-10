@@ -27,6 +27,23 @@ import { z } from 'zod';
 types.setTypeParser(1082, value => value);
 declare module 'fastify'{interface FastifyRequest{auth?:{userId:string;organizationId:string;role:string}}}
 
+// Zeabur 等平台数据库变量自适应：平台注入的是 POSTGRES_* 系列离散变量，
+// 而本服务统一读 DATABASE_URL。缺了这层，平台建库后服务仍报 database_not_configured。
+function resolveDatabaseUrl(): string | undefined {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  const host = process.env.POSTGRES_HOST || process.env.PGHOST;
+  const user = process.env.POSTGRES_USER || process.env.PGUSER;
+  const password = process.env.POSTGRES_PASSWORD || process.env.PGPASSWORD;
+  const database = process.env.POSTGRES_DB || process.env.PGDATABASE;
+  if (!host || !user || !database) return undefined;
+  const port = process.env.POSTGRES_PORT || process.env.PGPORT || '5432';
+  return `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password || '')}@${host}:${port}/${database}`;
+}
+if (!process.env.DATABASE_URL) {
+  const derived = resolveDatabaseUrl();
+  if (derived) process.env.DATABASE_URL = derived;
+}
+
 // CloudRun 当前没有 IPv6 出网；Supabase 域名双栈解析时优先 IPv6 会导致连接直接 ENETUNREACH。
 // 仅调整 DNS 结果顺序，不改变连接串、认证或数据库业务契约。
 setDefaultResultOrder('ipv4first');
