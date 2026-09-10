@@ -3,8 +3,8 @@ requires = ["nodejs-24"]
 
 [dev]
 build = ["sh", "-c", "pnpm -C backend install && pnpm -C web install && pnpm -C web exec vite build --mode release"]
-run = ["sh", "-c", "cd backend && node --env-file=.env --import tsx/esm src/server.ts"]
+run = ["sh", "-c", "cd backend && node --env-file=$([ -f .env ] && echo .env || echo ../.env) --import tsx/esm src/server.ts"]
 
 [deploy]
 build = ["sh", "-c", "pnpm -C backend install && pnpm -C backend run typecheck && pnpm -C web install && pnpm -C web exec vite build --mode release"]
-run = ["sh", "-c", "cd backend && node --env-file=.env --import tsx/esm src/server.ts"]
+run = ["sh", "-c", "cd backend && node --env-file=$([ -f .env ] && echo .env || echo ../.env) --import tsx/esm src/server.ts"]
