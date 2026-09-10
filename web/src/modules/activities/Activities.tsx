@@ -66,20 +66,7 @@ export default function ActivitiesPage() {
 
   const columns = [
     // 全部用 width 不用 minWidth：TDesign 会把富余整块塞给 minWidth 列造成名称列虚胖
-    { 
-      colKey: 'name', 
-      title: '活动名称', 
-      width: 140, // 减小宽度，压缩视觉占比
-      cell: ({ row }: any) => (
-        <div style={{ lineHeight: '1.4' }}>
-          {row.name.length > 12 ? (
-            <>
-              {row.name.slice(0, 10)}<br/>{row.name.slice(10)}
-            </>
-          ) : row.name}
-        </div>
-      )
-    },
+    { colKey: 'name', title: '活动名称', width: 210 },
     {
       colKey: 'dDay',
       title: '选举日',
@@ -119,14 +106,13 @@ export default function ActivitiesPage() {
         <Button
           theme="primary"
           variant="base"
-          size="large" // 改为 large，确保阿姨点得准
-          style={{ padding: '0 24px', height: '40px', fontSize: '14px' }} // 明确放大尺寸
+          size="small"
           onClick={() => {
             setFief(row.id);
             navigate(`/election/activity/${row.id}`);
           }}
         >
-          进入工作台
+          进入本届工作台
         </Button>
       ),
     },

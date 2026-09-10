@@ -121,7 +121,7 @@ export default function DashboardPage() {
       type: '法定公文待发布',
       name: a.title,
       time: a.createdAt,
-      link: `/election/activity/${a.electionFiefId || ''}`,
+      link: a.electionFiefId ? `/election/activity/${a.electionFiefId}` : '/election/activities',
       theme: 'default',
     })),
   ];
@@ -143,12 +143,12 @@ export default function DashboardPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 140,
+      width: 120,
       cell: ({ row }: any) => (
         <Button
           theme="primary"
-          variant="outline"
-          size="medium"
+          variant="text"
+          size="small"
           onClick={() => navigate(row.link)}
         >
           前往处理
@@ -178,7 +178,7 @@ export default function DashboardPage() {
                   : '经办编辑'}
               </Tag>
               <span style={{ marginLeft: 16 }}>
-                法律机制：D-day 全周期倒排驱动 · 村居彻底双轨隔离
+                以法定选举日（D 日）倒排驱动 · 村/社区分轨管理
               </span>
             </div>
           </Col>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
               <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-primary)', marginTop: 4 }}>
                 {fiefs.length}
               </div>
-              <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 4 }}>D-day 已倒排锁死</div>
+              <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 4 }}>法定选举日已确认，日程已倒排锁定</div>
             </Card>
           </div>
         </Col>

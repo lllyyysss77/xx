@@ -52,7 +52,8 @@ export default function ScheduleBoard() {
 
   const statusLabel: Record<string, { label: string; theme: string }> = {
     done: { label: '已完成', theme: 'success' },
-    current: { label: '进行中', theme: 'danger' },
+    // 「进行中」是正常态：红色全站只留给驳回/超期
+    current: { label: '进行中', theme: 'primary' },
     todo: { label: '未开始', theme: 'default' },
   };
 
@@ -98,8 +99,8 @@ export default function ScheduleBoard() {
           <div className={Style.controls}>
             <Space>
               <Radio.Group value={orgType} onChange={(v: any) => setOrgType(v)} variant="default-filled">
-                <Radio.Button value="village">🏡 行政村</Radio.Button>
-                <Radio.Button value="community">🏘 社区</Radio.Button>
+                <Radio.Button value="village"> 行政村</Radio.Button>
+                <Radio.Button value="community"> 社区</Radio.Button>
               </Radio.Group>
               <DatePicker
                 value={dDay}

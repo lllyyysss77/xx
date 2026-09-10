@@ -108,7 +108,7 @@ export default function DutyAuditLogsPage() {
     },
     {
       colKey: 'lastActiveAt',
-      title: '最近履职时间 (防旷工凭据)',
+      title: '最近履职时间',
       width: 200,
       cell: ({ row }: any) => (
         <span style={{ color: '#0052d9', fontWeight: 500 }}>
@@ -148,7 +148,7 @@ export default function DutyAuditLogsPage() {
     },
     {
       colKey: 'details',
-      title: '凭证细节 (JSON证据链)',
+      title: '操作明细',
       ellipsis: true,
       cell: ({ row }: any) => (
         <code style={{ fontSize: 12, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4 }}>
@@ -163,8 +163,8 @@ export default function DutyAuditLogsPage() {
     <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* 顶部防旷工履职统计卡片 */}
       <Card
-        title="经办人员在岗履职与防旷工考勤统计"
-        description="依据甲方严管要求，系统记录选委会经办人、工作人员起草公文、张贴发布公文、归档材料证据链，不可篡改、防推诿抵赖。"
+        title="经办人员在岗履职与履职在岗统计"
+        description="依据经办履职管理要求，系统记录选委会经办人、工作人员起草公文、张贴发布公文、归档材料证据链，不可篡改、防推诿抵赖。"
         actions={
           <Space>
             {isPlatformAdmin && (
@@ -178,7 +178,7 @@ export default function DutyAuditLogsPage() {
               />
             )}
             <Button icon={<RefreshIcon />} theme="default" onClick={loadData}>
-              刷新证据
+              刷新记录
             </Button>
           </Space>
         }

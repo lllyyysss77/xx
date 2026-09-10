@@ -165,12 +165,12 @@ export default function RolesPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 170,
+      width: 160,
       cell: ({ row }: any) => (
         <Button
           theme="primary"
-          variant="outline"
-          size="medium"
+          variant="text"
+          size="small"
           icon={<SettingIcon />}
           disabled={!isPlatformAdmin || row.key === 'platform_admin'}
           onClick={() => openConfigModal(row)}

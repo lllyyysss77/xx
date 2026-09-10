@@ -1,6 +1,19 @@
 import React, { memo, useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu } from 'tdesign-react';
+import {
+  HomeIcon,
+  FileAddIcon,
+  CalendarIcon,
+  TimeIcon,
+  UsergroupIcon,
+  FolderIcon,
+  UserIcon,
+  NotificationIcon,
+  FileCopyIcon,
+  SaveIcon,
+  SettingIcon,
+} from 'tdesign-icons-react';
 import { MENU_CONFIG } from 'configs/menu';
 import { useUiStore } from 'stores/useUiStore';
 import { useAuthStore } from 'stores/useAuthStore';
@@ -8,6 +21,25 @@ import MenuLogo from './MenuLogo';
 import Style from './Menu.module.less';
 
 const { SubMenu, MenuItem, HeadMenu } = Menu;
+
+/** 菜单图标统一映射：icon 名 -> TDesign 图标（替代 emoji，保持政务界面严肃性） */
+const ICON_MAP: Record<string, React.ReactNode> = {
+  home: <HomeIcon />,
+  'file-add': <FileAddIcon />,
+  calendar: <CalendarIcon />,
+  time: <TimeIcon />,
+  'user-group': <UsergroupIcon />,
+  folder: <FolderIcon />,
+  user: <UserIcon />,
+  notification: <NotificationIcon />,
+  'file-copy': <FileCopyIcon />,
+  archive: <SaveIcon />,
+  setting: <SettingIcon />,
+  dashboard: <HomeIcon />,
+  'lock-on': <SettingIcon />,
+  chat: <NotificationIcon />,
+};
+const menuIconOf = (key?: string) => ICON_MAP[key || ''] ?? <FolderIcon />;
 
 /** 按当前用户角色过滤菜单：子项声明了 roles 且当前角色不在其中则隐藏 */
 const filterByRole = <T extends { roles?: string[] }>(items: T[], role?: string): T[] =>
@@ -36,7 +68,7 @@ export const HeaderMenu = memo(() => {
         <MenuItem
           key={item.path}
           value={item.path}
-          icon={<span className={Style.menuIcon}>{item.icon}</span>}
+          icon={<span className={Style.menuIcon}>{menuIconOf(item.icon)}</span>}
           onClick={() => navigate(item.path)}
         >
           {item.title}
@@ -47,8 +79,8 @@ export const HeaderMenu = memo(() => {
 });
 
 /**
- * 左侧菜单：结构照「村长仪表盘」靶子 —— 分组标签 + 一级(emoji) + 子菜单。
- * 导航结构唯一来源 configs/menu.ts（外观不改）；角色来自 useAuthStore。
+ * 左侧菜单：分组标签 + 一级菜单 + 子菜单。
+ * 导航结构唯一来源 configs/menu.ts；角色来自 useAuthStore。
  */
 export default memo((props: IMenuProps) => {
   const location = useLocation();
@@ -88,7 +120,7 @@ export default memo((props: IMenuProps) => {
         <MenuItem
           key={item.path}
           value={item.path}
-          icon={<span className={Style.menuIcon}>{item.icon}</span>}
+          icon={<span className={Style.menuIcon}>{menuIconOf(item.icon)}</span>}
           onClick={() => navigate(item.path)}
         >
           {item.title}
@@ -100,7 +132,7 @@ export default memo((props: IMenuProps) => {
         key={`sub_${item.path}`}
         value={`sub_${item.path}`}
         title={item.title}
-        icon={<span className={Style.menuIcon}>{item.icon}</span>}
+        icon={<span className={Style.menuIcon}>{menuIconOf(item.icon)}</span>}
       >
         {children.map((child) => (
           <MenuItem key={child.path} value={child.path} onClick={() => navigate(child.path)}>

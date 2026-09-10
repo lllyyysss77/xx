@@ -149,7 +149,10 @@ export default function ArchivesPage() {
 
   // 文件下载（非法 key 防御：不满足 32 位 hex 规则不触发，避免 400）
   const handleDownload = (item: ArchiveItem) => {
-    if (!item.storageKey || !/^[a-f0-9]{32}(\.[a-zA-Z0-9]{1,10})?$/.test(item.storageKey)) return;
+    if (!item.storageKey || !/^[a-f0-9]{32}(\.[a-zA-Z0-9]{1,10})?$/.test(item.storageKey)) {
+      MessagePlugin.warning('该归档项暂无可下载的附件文件');
+      return;
+    }
     const url = getFileUrl(item.storageKey);
     const a = document.createElement('a');
     a.href = url;

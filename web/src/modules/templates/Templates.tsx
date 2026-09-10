@@ -78,8 +78,9 @@ export default function TemplatesPage() {
       colKey: 'atVersion',
       title: '版本',
       width: 88,
-      cell: () => (
-        <Tag size="small" theme="default" variant="light">2026版</Tag>
+      // [FIXED 2026-09-10] 版本列读接口真实字段 atVersion，不再写死“2026版”
+      cell: ({ row }: any) => (
+        <Tag size="small" theme="default" variant="light">{row.atVersion || '通用'}</Tag>
       ),
     },
     {
@@ -118,7 +119,7 @@ export default function TemplatesPage() {
     <div style={{ padding: 24 }}>
       <Card
         title="法定公文快捷模板库"
-        description="系统内置全套 18 篇法定发文模板（依据甲方 DOCX 编制）。村委会版与居委会版物理彻底分轨，正文包含 {{组织名称}}、{{届次}}、{{选举日}} 等法定占位符。"
+        description="系统内置全套法定发文模板（依据换届选举法定文书规范编制）。村委会版与居委会版分轨维护，正文支持按实情填写落款、日期等信息。"
         actions={
           <Input
             style={{ width: 240 }}
@@ -137,12 +138,12 @@ export default function TemplatesPage() {
             variant="default-filled"
             size="large"
           >
-            <Radio.Button value="village">🏡 村委会版法定模板 (18套)</Radio.Button>
-            <Radio.Button value="community">🏘 居委会版法定模板 (18套)</Radio.Button>
+            <Radio.Button value="village">村委会版法定模板</Radio.Button>
+            <Radio.Button value="community">居委会版法定模板</Radio.Button>
           </Radio.Group>
 
-          <span style={{ color: '#888', fontSize: 13 }}>
-            共包含 {filteredList.length} 套法定公文模板
+          <span style={{ color: 'var(--td-text-color-secondary, #888)', fontSize: 13 }}>
+            当前筛选 {filteredList.length} 套模板
           </span>
         </div>
 

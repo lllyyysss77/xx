@@ -42,6 +42,7 @@ import { useAuthStore } from '../../stores/useAuthStore';
 import { GuideTip } from '../../components/GuideTip';
 import { PermGate } from '../../components/PermGate';
 import { FileList } from '../../components/FileList';
+import { validateUploadFile, UPLOAD_ACCEPT } from '../../utils/upload';
 
 const { FormItem } = Form;
 
@@ -132,7 +133,7 @@ export default memo(function ProposalsPage() {
       // 全新创建
       setEditingId(null);
       const isCommunity = user?.orgType === 'community';
-      setTitle(`${user?.orgName || '本村'}2026年第十一届换届选举工作方案提案`);
+      setTitle(`${user?.orgName || '本村'}${new Date().getFullYear()}年换届选举工作方案提案`);
       setDDay('');
       setElectionMode('全民直选');
       setDescription('');
@@ -212,7 +213,9 @@ export default memo(function ProposalsPage() {
               sampleMimeType: uploadedMeta.mimeType,
             };
           } catch (e: any) {
-            console.warn(`岗位[${enrichedPositions[i].name}]样表上传失败:`, e);
+            // [FIXED 2026-09-10] 样表上传失败不再静默丢弃：明确提示用户重试
+            MessagePlugin.warning(`岗位「${enrichedPositions[i].name}」样表上传失败，请重新选择该附件后再提交`);
+            return;
           }
         }
       }
@@ -260,10 +263,10 @@ export default memo(function ProposalsPage() {
     try {
       await reviewProposal(currentProposal.id, reviewDecision, reviewNote.trim());
       if (reviewDecision === 'approved') {
-        MessagePlugin.success('🎉 提案审批通过！全套法定阶段日程、岗位及预排公文已依规自动生成！');
+        MessagePlugin.success('提案审批通过：法定阶段日程、岗位与预排公文已自动生成');
         // 审批通过后，引导用户前往活动列表查看
         setTimeout(() => {
-          MessagePlugin.info('👉 提示：请前往「选举活动管理」进入当届活动，开始推进日程并编辑发布公告！', 6000);
+          MessagePlugin.info('下一步：请前往「换届活动」进入当届活动，推进日程并发布公文。', 6000);
         }, 1200);
       } else {
         MessagePlugin.warning('提案已驳回，发起人可重新修改后提交');
@@ -345,13 +348,13 @@ export default memo(function ProposalsPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 220,
+      width: 200,
       cell: ({ row }: any) => (
-        <Space size={8}>
+        <Space>
           <Button
             theme="default"
-            variant="outline"
-            size="medium"
+            variant="text"
+            size="small"
             onClick={() => {
               setCurrentProposal(row);
               setDetailVisible(true);
@@ -364,8 +367,8 @@ export default memo(function ProposalsPage() {
           {row.status === 'rejected' && (
             <Button
               theme="warning"
-              variant="base"
-              size="medium"
+              variant="text"
+              size="small"
               onClick={() => openCreateModal(row)}
             >
               重新编辑
@@ -377,8 +380,8 @@ export default memo(function ProposalsPage() {
             <PermGate perm="proposal:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
               <Button
                 theme="primary"
-                variant="base"
-                size="medium"
+                variant="text"
+                size="small"
                 onClick={() => {
                   setCurrentProposal(row);
                   setReviewDecision('approved');
@@ -433,7 +436,7 @@ export default memo(function ProposalsPage() {
               placement="left"
             >
               <Button theme="primary" icon={<AddIcon />} onClick={() => openCreateModal()}>
-                ＋ 创建提案
+                创建提案
               </Button>
             </GuideTip>
           </PermGate>
@@ -464,7 +467,7 @@ export default memo(function ProposalsPage() {
           <Form labelWidth={150}>
             <FormItem label="归属机构">
               <Input
-                value={`${user?.orgType === 'community' ? '🏘 城市社区居委会' : '🏡 农村村民委员会'} · ${user?.orgName || '本单位'}`}
+                value={`${user?.orgType === 'community' ? '城市社区居委会' : '农村村民委员会'} · ${user?.orgName || '本单位'}`}
                 disabled
               />
             </FormItem>
@@ -473,7 +476,7 @@ export default memo(function ProposalsPage() {
               <Input
                 value={title}
                 onChange={setTitle}
-                placeholder="例如：阔口社区2026年第十一届居民委员会换届选举提案"
+                placeholder="例如：XX社区2026年居民委员会换届选举提案"
               />
             </FormItem>
 
@@ -486,7 +489,7 @@ export default memo(function ProposalsPage() {
                 style={{ width: '100%' }}
               />
               <div style={{ color: '#B22222', fontSize: 12, marginTop: 4 }}>
-                * 核心法定度量衡：提案审核通过后，全套 16 阶段公文、报名期限、联审日程均由此绝对日期依法倒排秒级生成。
+                * 法定选举日（D 日）是全部日程的基准：提案审核通过后，16 个法定阶段、报名期限与联审日程均由该日期依法倒排自动生成。
               </div>
             </FormItem>
 
@@ -518,9 +521,9 @@ export default memo(function ProposalsPage() {
                       value={pos.electionMethod || '全民直接选举'}
                       onChange={(v: any) => updatePosition(idx, 'electionMethod', v)}
                       options={[
-                        { label: '🗳 全民直接选举', value: '全民直接选举' },
-                        { label: '👨‍👩‍👧 户代表选举', value: '户代表选举' },
-                        { label: '👥 代表会议选举', value: '代表会议选举' },
+                        { label: '全民直接选举', value: '全民直接选举' },
+                        { label: '户代表选举', value: '户代表选举' },
+                        { label: '代表会议选举', value: '代表会议选举' },
                       ]}
                     />
                     <InputNumber
@@ -548,14 +551,17 @@ export default memo(function ProposalsPage() {
 
                   {/* 岗位专属资格表 / 样表附件上传（供参选人下载） */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: '#666', background: '#FFF', padding: '6px 12px', borderRadius: 4, border: '1px dashed #DCDCDC' }}>
-                    <span>📎 岗位参选资格样表/问答附件：</span>
+                    <span>岗位参选资格样表 / 问答附件：</span>
                     <input
                       ref={(el) => (posFileInputs.current[idx] = el)}
                       type="file"
+                      accept={UPLOAD_ACCEPT}
                       style={{ display: 'none' }}
                       onChange={(e) => {
                         if (e.target.files?.[0]) {
                           const file = e.target.files[0];
+                          const check = validateUploadFile(file);
+                          if (!check.ok) { MessagePlugin.warning(check.message || '文件不符合上传要求'); return; }
                           setPositionFiles(prev => ({ ...prev, [idx]: file }));
                           updatePosition(idx, 'sampleFileName', file.name);
                         }
@@ -587,9 +593,15 @@ export default memo(function ProposalsPage() {
               <input
                 ref={schemeFileInputRef}
                 type="file"
+                accept={UPLOAD_ACCEPT}
                 style={{ display: 'none' }}
                 onChange={(e) => {
-                  if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
+                  if (e.target.files?.[0]) {
+                    const file = e.target.files[0];
+                    const check = validateUploadFile(file);
+                    if (!check.ok) { MessagePlugin.warning(check.message || '文件不符合上传要求'); return; }
+                    setSelectedFile(file);
+                  }
                 }}
               />
               <Space align="center">
@@ -670,7 +682,7 @@ export default memo(function ProposalsPage() {
                         label: '驳回原因及补正要求',
                         content: (
                           <span style={{ color: '#D54941', fontWeight: 600 }}>
-                            ⚠️ {currentProposal.rejectReason}
+                            驳回理由：{currentProposal.rejectReason}
                           </span>
                         ),
                         span: 2,
@@ -702,10 +714,13 @@ export default memo(function ProposalsPage() {
                   <input
                     ref={detailUploadInputRef}
                     type="file"
+                    accept={UPLOAD_ACCEPT}
                     style={{ display: 'none' }}
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file || !currentProposal) return;
+                      const check = validateUploadFile(file);
+                      if (!check.ok) { MessagePlugin.warning(check.message || '文件不符合上传要求'); return; }
                       setDetailUploading(true);
                       try {
                         await uploadProposalFile(currentProposal.id, file);
@@ -797,7 +812,7 @@ export default memo(function ProposalsPage() {
 
           {reviewDecision === 'approved' && (
             <div style={{ padding: '10px 14px', background: '#E8F5ED', borderRadius: 6, fontSize: 12, color: '#2D8B55' }}>
-              💡 <strong>法律引擎联动说明</strong>：审查通过后，系统将在数据库单事务内自动生成当届封地活动、16 阶段法定日程倒排、各岗位及 16 篇预排法定公文草稿。
+              <strong>流程联动说明</strong>：审查通过后，系统将自动生成当届换届活动、16 阶段法定倒排日程、各岗位及配套法定公文草稿。
             </div>
           )}
         </Form>

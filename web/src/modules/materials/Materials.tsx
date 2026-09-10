@@ -42,6 +42,7 @@ import { FileList } from '../../components/FileList';
 import { getFileUrl, formatFileSize } from '../../api/files';
 import { ElectionSessionList } from '../../components/ElectionSessionList';
 import { SessionDetailBar } from '../../components/ElectionSessionList/SessionDetailBar';
+import { validateUploadFile, validateUploadFiles, UPLOAD_ACCEPT } from '../../utils/upload';
 
 const { FormItem } = Form;
 
@@ -151,7 +152,7 @@ export default memo(function MaterialsPage() {
         }
       }
 
-      MessagePlugin.success(`已为【${recName.trim()}】建立组织推荐档案，账号密码已预设为 123456`);
+      MessagePlugin.success(`已为【${recName.trim()}】建立组织推荐档案；如需向其发送参选账号信息，请在人员管理中重置密码后告知`);
       setRecommendVisible(false);
       setRecName('');
       setRecPhone('');
@@ -177,7 +178,7 @@ export default memo(function MaterialsPage() {
     try {
       await reviewMaterial(currentMaterial.id, reviewDecision, reviewNote.trim());
       if (reviewDecision === 'approved') {
-        MessagePlugin.success('🎉 资格初审通过！参选人已单事务自动推入候选人联审池！');
+        MessagePlugin.success('资格初审通过，参选人已进入候选人联审池');
       } else {
         MessagePlugin.warning('材料已驳回，已反馈需补正事项');
       }
@@ -250,7 +251,7 @@ export default memo(function MaterialsPage() {
         return (
           <div>
             <Tag theme={isSelf ? 'primary' : 'default'} variant="light" size="small" style={{ marginRight: 6 }}>
-              {isSelf ? '🙋 个人自荐' : '🎖 组织推荐'}
+              {isSelf ? '个人自荐' : '组织推荐'}
             </Tag>
             <span style={{ fontSize: 13, color: '#1A1A1A' }}>{row.title}</span>
           </div>
@@ -280,10 +281,12 @@ export default memo(function MaterialsPage() {
       cell: ({ row }: any) => {
         const meta = STATUS_META[row.status as keyof typeof STATUS_META] || { label: row.status, theme: 'default' };
         const tipContent = row.status === 'approved'
-          ? '材料初审已通过 ✅ 此人已自动进入候选人联审池，可在「候选人管理」中查看四轮审查进度。'
+          ? '材料初审已通过，此人已自动进入候选人联审池，可在「候选人管理」中查看四轮审查进度。'
           : row.status === 'submitted'
-          ? '材料已提交，等待村级工作人员初审。'
-          : '草稿状态，尚未提交审核。';
+          ? '材料已提交，等待经办人员初审。'
+          : row.status === 'rejected'
+          ? '材料已驳回：请按审核批注补正后重新提交。'
+          : '材料已建档，等待提交审核。';
         return (
           <GuideTip content={tipContent} placement="top">
             <Tag theme={meta.theme} variant="light">{meta.label}</Tag>
@@ -294,13 +297,13 @@ export default memo(function MaterialsPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 200,
+      width: 180,
       cell: ({ row }: any) => (
-        <Space size={8}>
+        <Space>
           <Button
             theme="default"
-            variant="outline"
-            size="medium"
+            variant="text"
+            size="small"
             onClick={() => {
               setCurrentMaterial(row);
               setDetailVisible(true);
@@ -313,8 +316,8 @@ export default memo(function MaterialsPage() {
             <PermGate perm="material:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
               <Button
                 theme="primary"
-                variant="base"
-                size="medium"
+                variant="text"
+                size="small"
                 onClick={() => {
                   setCurrentMaterial(row);
                   setReviewDecision('approved');
@@ -337,7 +340,7 @@ export default memo(function MaterialsPage() {
       <div style={{ padding: 24, background: '#FAF8F5', minHeight: '100%' }}>
         <ElectionSessionList
           title="材料提交管理"
-          sub="【层级铁律】先选届：材料按选举活动（届）物理隔离，进入具体届次后查验并审核该届参选人材料。"
+          sub="报名材料按届次受理：先选择具体届次，即可查验、初审该届参选人材料，或录入组织推荐。"
           data={fiefs}
           loading={loading}
           statLabel="待审/总材料"
@@ -405,8 +408,8 @@ export default memo(function MaterialsPage() {
               clearable
               options={[
                 { label: '全部类型', value: '' },
-                { label: '🙋 个人自荐', value: 'self' },
-                { label: '🎖 组织推荐', value: 'org' },
+                { label: '个人自荐', value: 'self' },
+                { label: '组织推荐', value: 'org' },
               ]}
             />
             <Button theme="default" variant="base" icon={<RefreshIcon />} onClick={loadData}>
@@ -448,8 +451,8 @@ export default memo(function MaterialsPage() {
 
           <FormItem label="联系手机号" requiredMark>
             <Input value={recPhone} onChange={setRecPhone} placeholder="请输入11位有效手机号" />
-            <div style={{ color: '#7A7A7A', fontSize: 12, marginTop: 4 }}>
-              若该干部尚未注册，系统将自动开通参选人账号，初始密码默认统一设为 123456。
+            <div style={{ color: 'var(--td-text-color-secondary, #7A7A7A)', fontSize: 12, marginTop: 4 }}>
+              若该干部尚未注册，系统将自动开通参选人账号；初始密码由管理员在「人员管理」中重置后告知本人。
             </div>
           </FormItem>
 
@@ -470,11 +473,16 @@ export default memo(function MaterialsPage() {
               ref={recFileInputRef}
               type="file"
               multiple
+              accept={UPLOAD_ACCEPT}
               style={{ display: 'none' }}
               onChange={(e) => {
-                if (e.target.files) {
-                  setRecFiles(Array.from(e.target.files));
+                const incoming = Array.from(e.target.files || []);
+                const check = validateUploadFiles(incoming);
+                if (!check.ok) {
+                  MessagePlugin.warning(check.message || '文件不符合上传要求');
+                  return;
                 }
+                setRecFiles(incoming);
               }}
             />
             <Button
@@ -485,8 +493,20 @@ export default memo(function MaterialsPage() {
             >
               选择文件
             </Button>
-            <div style={{ color: '#7A7A7A', fontSize: 12, marginTop: 4 }}>
-              支持上传身份证扫描件、任职表、学历证明等多份材料，支持原名原格式高速下载与图片预览。
+            {recFiles.length > 0 && (
+              <div style={{ marginTop: 8 }}>
+                {recFiles.map((f) => (
+                  <Tag key={f.name} size="small" theme="primary" variant="light" style={{ marginRight: 6 }}>
+                    {f.name}
+                  </Tag>
+                ))}
+                <Button size="small" variant="text" theme="default" onClick={() => setRecFiles([])}>
+                  清空
+                </Button>
+              </div>
+            )}
+            <div style={{ color: 'var(--td-text-color-secondary, #7A7A7A)', fontSize: 12, marginTop: 4 }}>
+              支持上传身份证扫描件、任职表、学历证明等多份材料（PDF/Word/图片，单个不超过 20MB）。
             </div>
           </FormItem>
         </Form>
@@ -562,15 +582,22 @@ export default memo(function MaterialsPage() {
               <input
                 ref={suppFileInputRef}
                 type="file"
+                accept={UPLOAD_ACCEPT}
                 style={{ display: 'none' }}
                 disabled={submitting}
                 onChange={async (e) => {
                   if (e.target.files?.[0] && currentMaterial) {
                     const file = e.target.files[0];
+                    e.target.value = '';
+                    const check = validateUploadFile(file);
+                    if (!check.ok) {
+                      MessagePlugin.warning(check.message || '文件不符合上传要求');
+                      return;
+                    }
                     setSubmitting(true);
                     try {
                       await uploadMaterialFile(currentMaterial.id, file);
-                      MessagePlugin.success(`【${file.name}】已成功上传并归档！`);
+                      MessagePlugin.success(`【${file.name}】已上传并归档`);
                       loadData();
                       setDetailVisible(false);
                     } catch (err: any) {
@@ -636,7 +663,7 @@ export default memo(function MaterialsPage() {
 
           {reviewDecision === 'approved' && (
             <div style={{ padding: '10px 14px', background: '#E8F5ED', borderRadius: 6, fontSize: 12, color: '#2D8B55' }}>
-              💡 <strong>注意</strong>：材料初审合格后，该干部将自动正式进入<strong>候选人池</strong>，启动 R1 镇街资格初审流程。
+              <strong>注意</strong>：材料初审合格后，该干部将正式进入<strong>候选人池</strong>，启动 R1 镇街资格初审流程。
             </div>
           )}
         </Form>

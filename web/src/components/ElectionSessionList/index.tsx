@@ -89,13 +89,12 @@ export const ElectionSessionList: React.FC<ElectionSessionListProps> = ({
     {
       colKey: 'op',
       title: '操作',
-      width: 170,
+      width: 156,
       cell: ({ row }) => (
         <Button
           variant="base"
           theme="primary"
-          size="medium"
-          style={{ padding: '0 20px', height: '36px', fontWeight: 600 }}
+          size="small"
           onClick={() => onEnter(row)}
         >
           {enterText}

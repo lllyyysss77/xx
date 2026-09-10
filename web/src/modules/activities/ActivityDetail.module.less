@@ -365,7 +365,7 @@
   font-size: 14px;
   background: #f8fafc;
   border-radius: 6px;
-  border: 1px solid var(--border-base);
+  border: 1px dashed #cbd5e1;
   margin-top: 10px;
 }
 
@@ -471,11 +471,11 @@
   box-shadow: var(--shadow-md);
 }
 
-/* 上传附件按钮：实线细边 + 柔和底色，识别为稳重操作区 */
+/* 上传附件按钮：虚线边框 + 浅灰底，识别为上传区 */
 .wbUploadBtn {
-  border: 1px solid var(--border-base) !important;
-  background: var(--bg-hover) !important;
-  color: var(--text-1) !important;
+  border: 1.5px dashed var(--border-dark) !important;
+  background: var(--bg-disabled) !important;
+  color: var(--text-2) !important;
   font-weight: var(--fw-medium) !important;
   transition: all 0.2s !important;
 }

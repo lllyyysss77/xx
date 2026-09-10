@@ -263,11 +263,11 @@ export default memo(function CandidatesPage() {
           return <Tag theme="danger" variant="light">审查不合格·淘汰</Tag>;
         }
         if (row.currentRound === 'complete' && row.status === 'approved') {
-          return <Tag theme="success" variant="dark">🎉 正式候选人</Tag>;
+          return <Tag theme="success" variant="dark">正式候选人</Tag>;
         }
         return (
           <Tag theme="warning" variant="light">
-            ⏳ 进行中 ({ROUND_CONFIG[row.currentRound]?.short || '审查中'})
+            进行中（{ROUND_CONFIG[row.currentRound]?.short || '审查中'}）
           </Tag>
         );
       },
@@ -275,13 +275,13 @@ export default memo(function CandidatesPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 230,
+      width: 200,
       cell: ({ row }: any) => (
-        <Space size={8}>
+        <Space>
           <Button
             theme="default"
-            variant="outline"
-            size="medium"
+            variant="text"
+            size="small"
             onClick={() => {
               setCurrentCandidate(row);
               setDetailVisible(true);
@@ -294,8 +294,8 @@ export default memo(function CandidatesPage() {
             <PermGate perm="candidate:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
               <Button
                 theme="primary"
-                variant="base"
-                size="medium"
+                variant="text"
+                size="small"
                 onClick={() => openReviewModal(row)}
               >
                 回填联审结果
@@ -313,7 +313,7 @@ export default memo(function CandidatesPage() {
       <div style={{ padding: 24, background: '#FAF8F5', minHeight: '100%' }}>
         <ElectionSessionList
           title="候选人管理"
-          sub="【层级铁律】先选届：候选人四轮审核依附于具体的换届活动（封地），进入具体届次后查看入围干部及推进 R1~R4 联审进度。"
+          sub="候选人按届次管理：先选择具体届次，即可查看入围人选名单，并逐轮回填 R1～R4 联审结论。"
           data={fiefs}
           loading={loading}
           statLabel="入围候选人数"
@@ -322,7 +322,7 @@ export default memo(function CandidatesPage() {
             const passed = fiefCands.filter((c) => c.status === 'approved' && c.currentRound === 'complete').length;
             return (
               <Tag theme={passed > 0 ? 'success' : fiefCands.length > 0 ? 'primary' : 'default'} variant="light">
-                {fiefCands.length} 位入围 {passed > 0 ? `(${passed}位当选)` : ''}
+                {fiefCands.length} 位入围 {passed > 0 ? `（${passed} 位联审通过）` : ''}
               </Tag>
             );
           }}
@@ -352,7 +352,7 @@ export default memo(function CandidatesPage() {
       <Card
         bordered
         title={`【${currentFief.name}】候选人资格四轮联审管理池`}
-        description="初审合格参选人依法进入本池。依序完成 R1 镇街初审 ➔ R2 代表预选 ➔ R3 部门联审 ➔ R4 党委考察，线下审查由经办按文号线上回填。"
+        description="初审合格参选人依法进入本池，依序完成 R1 镇街初审、R2 代表预选、R3 部门联审、R4 党委考察；线下审查结论由经办按文号线上回填。"
       >
         {/* 工具栏 */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
@@ -564,7 +564,7 @@ export default memo(function CandidatesPage() {
 
           {decision === 'approved' && selectedRound === 'R4' && (
             <div style={{ padding: '10px 14px', background: '#E8F5ED', borderRadius: 6, fontSize: 12, color: '#2D8B55' }}>
-              🎉 <strong>恭喜</strong>：第四轮考察通过后，该干部将正式确定为<strong>法定正式候选人</strong>，并在 9 号红头公告中予以全区公示！
+              <strong>说明</strong>：第四轮考察通过后，该人选即确定为<strong>正式候选人</strong>，并在 9 号公告中依法公示。
             </div>
           )}
         </Form>

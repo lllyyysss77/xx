@@ -36,7 +36,7 @@ export const ALL_MODULES: BusinessModule[] = [
   },
   {
     key: 'home',
-    name: 'D 日工作台',
+    name: '工作台',
     path: '/election/home',
     icon: 'home',
     category: 'election',
@@ -83,7 +83,7 @@ export const ALL_MODULES: BusinessModule[] = [
   },
   {
     key: 'positions',
-    name: '岗位选举表',
+    name: '岗位管理',
     path: '/election/positions',
     icon: 'user-group',
     category: 'election',

@@ -28,6 +28,8 @@ export default function AnnouncementsPage() {
   const [selectedFiefId, setSelectedFiefId] = useState<string>('');
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentAnn, setCurrentAnn] = useState<Announcement | null>(null);
+  // 各届公告真实统计（届列表页展示，不再渲染假统计）
+  const [fiefStats, setFiefStats] = useState<Record<string, { total: number; published: number }>>({});
 
   // 选届穿透状态：null 为第一级活动列表，有值则进入该届公告列表
   const [currentFief, setCurrentFief] = useState<ElectionFief | null>(null);
@@ -35,9 +37,9 @@ export default function AnnouncementsPage() {
   const { user } = useAuthStore();
   const currentFiefId = useElectionStore((s) => s.currentFiefId);
 
-  // 初始化加载活动
+  // 初始化加载活动 + 各届公告真实统计
   useEffect(() => {
-    getElectionFiefs().then((data) => {
+    getElectionFiefs().then(async (data) => {
       // 本页活动列表按创建时间倒序：最新创建的排最前（后端默认按 d_day 降序返回）
       const sortedFiefs = [...data].sort((a, b) =>
         String(b.createdAt || '').localeCompare(String(a.createdAt || '')),
@@ -47,6 +49,19 @@ export default function AnnouncementsPage() {
         const target = currentFiefId || sortedFiefs[0].id;
         setSelectedFiefId(target);
       }
+      // 逐届拉取真实公告计数（公告总量≤21/届，开销可控）
+      const stats: Record<string, { total: number; published: number }> = {};
+      await Promise.all(
+        sortedFiefs.map(async (f) => {
+          try {
+            const rows = await getAnnouncements({ electionFiefId: f.id });
+            stats[f.id] = { total: rows.length, published: rows.filter((a) => a.status === 'published').length };
+          } catch {
+            stats[f.id] = { total: 0, published: 0 };
+          }
+        }),
+      );
+      setFiefStats(stats);
     });
   }, [currentFiefId]);
 
@@ -141,14 +156,16 @@ export default function AnnouncementsPage() {
       <div style={{ padding: 24, background: '#FAF8F5', minHeight: '100%' }}>
         <ElectionSessionList
           title="公告通知管理"
-          sub="【层级铁律】先选届：16 阶段公文草稿与正式公告按活动（届）全套归卷，进入具体届次后核验红头公文发文留痕。"
+          sub="公文按届次归卷管理：先选择具体届次，即可查看该届 16 阶段公文草稿、发文进度与红头公文留痕。"
           data={fiefs}
           loading={loading}
           statLabel="已发/总公文"
           statOf={(f) => {
+            const s = fiefStats[f.id];
+            if (!s) return <Tag theme="default" variant="light">统计中…</Tag>;
             return (
-              <Tag theme="success" variant="light">
-                法定16篇红头预置
+              <Tag theme={s.published > 0 ? 'success' : 'warning'} variant="light">
+                已发布 {s.published} / 共 {s.total} 篇
               </Tag>
             );
           }}
@@ -188,7 +205,7 @@ export default function AnnouncementsPage() {
 
       <Card
         title={`【${currentFief.name}】公告发文台账`}
-        description="所有法定公告内容在【选举提案】通过瞬间全部自动生成。本页面为纯记录台账，用于审计核验小编是否按法定节点执行发文。"
+        description="法定公告草稿在提案审批通过后自动生成；本页面为发文台账，用于核验各阶段公文是否按法定节点发布留痕。"
       >
         <div style={{ marginBottom: 16, display: 'flex', gap: 16 }}>
           <Tag theme="primary" variant="light" size="large">

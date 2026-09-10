@@ -44,7 +44,7 @@ export default function UsersPage() {
   const [orgs, setOrgs] = useState<OrgItem[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>('');
 
-  // 秘密开账号弹窗
+  // 开通账号弹窗
   const [createVisible, setCreateVisible] = useState(false);
   const [newPhone, setNewPhone] = useState('');
   const [newDisplayName, setNewDisplayName] = useState('');
@@ -94,7 +94,7 @@ export default function UsersPage() {
     setCreateVisible(true);
   };
 
-  // 提交秘密开通账号
+  // 提交开通账号
   const handleCreateSubmit = async () => {
     if (!newPhone.trim() || !newDisplayName.trim() || !newOrgId) {
       MessagePlugin.error('请完整输入手机号、真实姓名并指定归属地');
@@ -114,7 +114,7 @@ export default function UsersPage() {
         role: newRole,
       });
 
-      MessagePlugin.success('账号开通成功！初始密码默认已设为 123456');
+      MessagePlugin.success('账号开通成功，请将初始密码告知本人并提醒其首次登录后修改');
       setCreateVisible(false);
       loadData();
     } catch (err: any) {
@@ -157,11 +157,11 @@ export default function UsersPage() {
     }
   };
 
-  // 重置初始密码 123456
+  // 重置为初始密码
   const handleResetPassword = async (account: Account) => {
     try {
       await resetPassword(account.id);
-      MessagePlugin.success(`已成功将【${account.displayName || account.phone}】密码重置为初始密码 123456`);
+      MessagePlugin.success(`已将【${account.displayName || account.phone}】的密码重置为初始密码`);
     } catch (err: any) {
       MessagePlugin.error(err.message || '重置密码失败');
     }
@@ -183,7 +183,7 @@ export default function UsersPage() {
     {
       colKey: 'displayName',
       title: '姓名 / 显示名',
-      width: 160,
+      width: 150,
       cell: ({ row }: any) => (
         <Space size="small">
           <UserIcon style={{ color: '#0052d9' }} />
@@ -191,12 +191,12 @@ export default function UsersPage() {
         </Space>
       ),
     },
-    { colKey: 'phone', title: '手机号 (登录账号)', width: 140 },
-    { colKey: 'organizationName', title: '归属村居单位', width: 180 },
+    { colKey: 'phone', title: '手机号 (登录账号)', width: 128 },
+    { colKey: 'organizationName', title: '归属村居单位', width: 148 },
     {
       colKey: 'role',
       title: '行政职务角色',
-      width: 200,
+      width: 186,
       cell: ({ row }: any) => {
         const r = ROLE_MAP[row.role] || { name: row.role, theme: 'default' };
         return <Tag theme={r.theme} variant="light">{r.name}</Tag>;
@@ -205,29 +205,38 @@ export default function UsersPage() {
     {
       colKey: 'status',
       title: '账号状态',
-      width: 110,
+      width: 96,
       cell: ({ row }: any) => <StatusTag type="account" status={row.status} />,
     },
-    { colKey: 'createdAt', title: '开通时间', width: 160 },
+    {
+      colKey: 'createdAt',
+      title: '开通时间',
+      width: 108,
+      // [FIXED 2026-09-10] ISO 串直接渲染导致断行（表格硬伤），统一短日期 + nowrap
+      cell: ({ row }: any) => (
+        <span style={{ whiteSpace: 'nowrap', fontSize: 13 }}>{String(row.createdAt || '').slice(0, 10) || '—'}</span>
+      ),
+    },
     {
       colKey: 'op',
       title: '管理操作',
-      width: 220,
+      // [FIXED 2026-09-10] 200 装不下「重置密码 + 停用/启用」双按钮，导致按钮裁半截
+      width: 226,
       cell: ({ row }: any) => (
-        <Space size={8}>
+        <Space>
           <Popconfirm
-            content={`确认将该账号密码重置为 123456 吗？`}
+            content={`确认将该账号密码重置为初始密码吗？`}
             onConfirm={() => handleResetPassword(row)}
           >
-            <Button theme="primary" variant="outline" size="medium" icon={<RefreshIcon />}>
+            <Button theme="primary" variant="text" size="small" icon={<RefreshIcon />}>
               重置密码
             </Button>
           </Popconfirm>
 
           <Button
             theme={row.status === 'active' ? 'danger' : 'success'}
-            variant={row.status === 'active' ? 'outline' : 'base'}
-            size="medium"
+            variant="text"
+            size="small"
             onClick={() => handleToggleStatus(row)}
           >
             {row.status === 'active' ? '停用' : '启用'}
@@ -241,7 +250,7 @@ export default function UsersPage() {
     <div style={{ padding: 24 }}>
       <Card
         title="人员与账号管理"
-        description="内部工作账号严禁公开注册，均由区平台超级管理员或各村居选委会负责人按行政权责统一开通，初始密码统一为 123456。"
+        description="内部工作账号不开放公开注册，由区平台管理员或各村居选委会负责人按职责统一开通；初始密码请线下告知本人。"
         actions={
           <Space>
             {isPlatformAdmin && (
@@ -252,7 +261,7 @@ export default function UsersPage() {
                   onChange={(v: any) => setSelectedOrgId(v)}
                   placeholder="按归属地筛选"
                   clearable
-                  options={orgs.map((o) => ({ label: `${o.orgType === 'community' ? '🏘' : '🏡'} ${o.name}`, value: o.id }))}
+                  options={orgs.map((o) => ({ label: `${o.orgType === 'community' ? '社区' : '村'} · ${o.name}`, value: o.id }))}
                 />
                 <Button
                   theme="default"
@@ -275,9 +284,9 @@ export default function UsersPage() {
         <Table data={list} columns={columns} rowKey="id" loading={loading} />
       </Card>
 
-      {/* 秘密开通内部账号 Dialog */}
+      {/* 开通内部账号 Dialog */}
       <Dialog
-        header="秘密开通村居工作账号"
+        header="开通村居工作账号"
         visible={createVisible}
         onClose={() => setCreateVisible(false)}
         confirmBtn={{ content: '确认开通并分配密码', theme: 'primary', loading: submitting }}
@@ -289,8 +298,8 @@ export default function UsersPage() {
             <Select
               value={newOrgId}
               onChange={(v: any) => setNewOrgId(v)}
-              options={orgs.map((o) => ({ label: `${o.orgType === 'community' ? '🏘 社区' : '🏡 行政村'} · ${o.name}`, value: o.id }))}
-              placeholder="请指定归属地（一旦分配终身绑死）"
+              options={orgs.map((o) => ({ label: `${o.orgType === 'community' ? '社区' : '行政村'} · ${o.name}`, value: o.id }))}
+              placeholder="请指定归属地（账号归属分配后不可变更）"
               disabled={!isPlatformAdmin}
             />
           </FormItem>
@@ -301,7 +310,7 @@ export default function UsersPage() {
               onChange={(v: any) => setNewRole(v)}
               options={[
                 { label: '村居子管理员（选委会主任/全面管辖）', value: 'sub_admin' },
-                { label: '经办编辑（选委会工作人员/干活小编）', value: 'editor' },
+                { label: '经办编辑（选委会工作人员）', value: 'editor' },
                 { label: '审核人（上级联审代表/指导组）', value: 'reviewer' },
               ]}
             />
@@ -326,7 +335,7 @@ export default function UsersPage() {
 
           <Divider style={{ margin: '16px 0' }} />
           <div style={{ background: '#eef4ff', padding: '10px 14px', borderRadius: 4, color: '#0052d9', fontSize: 13, lineHeight: 1.6 }}>
-            🔒 安全机制：新账号开通后默认登录密码统一设为 <strong>123456</strong>。工作人员首次登录后，可在工作台顶部自主修改密码。
+            安全说明：新账号开通后由系统生成初始密码，请线下告知本人；工作人员首次登录后，可在工作台右上角自主修改密码。
           </div>
         </Form>
       </Dialog>
@@ -346,8 +355,8 @@ export default function UsersPage() {
               value={orgType}
               onChange={(v: any) => setOrgType(v)}
               options={[
-                { label: '🏡 农村行政村 (village)', value: 'village' },
-                { label: '🏘 城市社区 (community)', value: 'community' },
+                { label: '农村行政村', value: 'village' },
+                { label: '城市社区', value: 'community' },
               ]}
             />
           </FormItem>
@@ -369,7 +378,7 @@ export default function UsersPage() {
           </FormItem>
 
           <div style={{ background: '#fdf6ec', padding: '10px 14px', borderRadius: 4, color: '#e6a23c', fontSize: 12, lineHeight: 1.5, marginTop: 8 }}>
-            💡 规则提醒：唯一标识代码（Slug）一旦创建不可变更，将直接用于登录界面村社定位与一人一地组织隔离。
+            规则说明：归属地标识（Slug）创建后不可变更，用于登录页村社定位与数据归属隔离。
           </div>
         </Form>
       </Dialog>

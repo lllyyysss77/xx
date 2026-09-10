@@ -9,6 +9,11 @@
    改动范围：仅样式。不动任何 ts/tsx。
    ============================================================================ */
 
+/* 标题衬线字体公网加载（CN 官方域）：
+   Songti SC 仅 macOS 有，Windows 会退化到 SimSun（渲染发虚）。
+   Noto Serif SC 与思源宋体同源，跨平台渲染一致。display=swap 不阻塞首屏。 */
+@import url('https://fonts.googleapis.cn/css2?family=Noto+Serif+SC:wght@600;700&display=swap');
+
 /* ⚠️ 选择器必须带 :root[theme-mode='light']：
    TDesign 把令牌定义在 `:root,:root[theme-mode=light]`（特异性 0,1,1），
    main.tsx 又给 <html> 打了 theme-mode="light"。只写 :root（0,1,0）会被组件库反压，
@@ -17,7 +22,7 @@
 :root[theme-mode='light'] {
   /* ── 字体族 ──
      标题宋体（书卷气、官方感）；正文黑体（屏幕可读）；元数据等宽（对齐、防抖） */
-  --font-serif: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', 'STSong', 'SimSun', '宋体', serif;
+  --font-serif: 'Noto Serif SC', 'Songti SC', 'Source Han Serif SC', 'Source Han Serif CN', 'STSong', 'SimSun', '宋体', serif;
   --font-base: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
   --font-title: var(--font-serif);
   --font-mono: 'SF Mono', 'DIN Alternate', Menlo, Consolas, 'Courier New', monospace;
@@ -267,7 +272,7 @@ h4 { font-size: var(--fs-16); }
 .t-dialog__header,
 .t-drawer__header {
   font-family: var(--font-title) !important;
-  font-size: 20px !important;
+  font-size: var(--fs-16) !important;
   font-weight: 600 !important;
   letter-spacing: 1px;
 }
@@ -361,7 +366,7 @@ h4 { font-size: var(--fs-16); }
 .t-default-menu .t-menu__submenu .t-menu__item {
   height: 40px !important;
   line-height: 40px !important;
-  font-size: 15px !important;
+  font-size: 13.5px !important;
   color: rgba(255, 255, 255, 0.65) !important;
 }
 .t-default-menu .t-submenu .t-submenu__inner .t-menu__item:hover {
@@ -382,7 +387,7 @@ h4 { font-size: var(--fs-16); }
 .t-layout__header {
   background: #ffffff !important;
   border-bottom: 1px solid var(--skin-sidebar-line) !important;
-  box-shadow: 0 4px 12px rgba(26, 31, 54, 0.1) !important;
+  box-shadow: none !important;
 }
 [class*='brandTitle'] {
   font-family: var(--font-title) !important;
@@ -397,13 +402,12 @@ h4 { font-size: var(--fs-16); }
 }
 
 /* ============================================================
-   容器：平面化（hairline 定边界，米白书卷底，不用廉价粗虚线）
+   容器：平面化（hairline 定边界，不用阴影堆叠）
    ============================================================ */
 .t-card {
-  border-radius: 8px !important;
-  border: 1px solid var(--border-base) !important;
-  background-color: #ffffff !important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-light) !important;
+  box-shadow: none !important;
 }
 
 /* 浮层仍然需要阴影 —— 它真的浮在页面之上 */
@@ -413,92 +417,41 @@ h4 { font-size: var(--fs-16); }
 .t-select-input,
 .t-tooltip {
   box-shadow: var(--shadow-lg) !important;
-  border-radius: 8px !important;
+  border-radius: var(--radius-lg) !important;
 }
 
 /* ============================================================
-   表格：政务后台的主战场。实线收敛、端庄清爽、大字号易读、大触控区
+   表格：政务后台的主战场。行高放开、斑马纹压到最淡、表头用纸色
    ============================================================ */
-/* 1. 统一表格容器样式：实线细边框，禁止粗糙虚线 */
 .t-table {
-  border: 1px solid var(--border-base) !important;
-  border-radius: 8px !important;
-  background-color: #ffffff !important;
+  border-radius: var(--radius-lg) !important;
   overflow: hidden !important;
+  box-shadow: none !important;
+  border: 1px solid var(--border-light) !important;
 }
 
-/* 表头：米白纸底 + 墨蓝深色字 + 14px加粗 + 实线分割 */
+/* 表头：米白纸色 + 上下双 hairline（下边界比上边界重，形成「压条」） */
 .t-table__header tr {
   background-color: #f7f5f1 !important;
 }
-
 .t-table th {
-  color: var(--color-primary) !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
-  letter-spacing: 0.5px;
-  background-color: #f7f5f1 !important;
-  border-bottom: 1px solid var(--border-base) !important;
-  border-right: 1px solid #edebe8 !important;
-}
-
-.t-table th.t-table__cell {
-  padding: 14px 16px !important;
-}
-
-/* 单元格：15px 适老化大字号，呼吸空间充足，浅实线微分隔 */
-.t-table .t-table__cell {
-  padding: 14px 16px !important;
-  font-size: 15px !important;
-  line-height: 1.6 !important;
   color: var(--text-1) !important;
-  border-bottom: 1px solid #f0f0f0 !important;
-  border-right: 1px solid #f6f6f6 !important;
-}
-
-/* 2. 按钮体系：大号易点、色彩鲜明、层次分明 */
-/* 主操作按钮：墨蓝底 + 白字 + 饱满高度 */
-.t-button--theme-primary:not(.t-button--variant-outline):not(.t-button--variant-dashed):not(.t-button--variant-text) {
-  background-color: var(--color-primary) !important;
-  border-color: var(--color-primary) !important;
-  color: #ffffff !important;
   font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border-base) !important;
+}
+.t-table th.t-table__cell {
+  /* 横向 padding 20→14：窄屏（980 基准）下每行省出 ~60px，少触发表格内滚动 */
+  padding: 12px 14px !important;
 }
 
-.t-button--theme-primary:not(.t-button--variant-outline):not(.t-button--variant-dashed):not(.t-button--variant-text):hover {
-  background-color: var(--color-primary-hover) !important;
-  border-color: var(--color-primary-hover) !important;
-}
-
-/* 次级/描边按钮：浅色墨蓝高光，不抢主按钮视线 */
-.t-button--theme-primary.t-button--variant-outline,
-.t-button--theme-default.t-button--variant-outline {
-  border: 1px solid var(--color-primary) !important;
-  color: var(--color-primary) !important;
-  background-color: var(--color-primary-light) !important;
-  font-weight: 500 !important;
-}
-
-/* 警告/危险类按钮：印章红 */
-.t-button--theme-danger {
-  background-color: var(--seal) !important;
-  border-color: var(--seal) !important;
-  color: #ffffff !important;
-}
-
-/* 3. 卡片优化：端庄书卷气，无虚线干扰 */
-.t-card__title {
-  color: var(--color-primary) !important;
-  font-family: var(--font-title) !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
+.t-table .t-table__cell {
+  padding: 12px 14px !important;
+  font-size: 13.5px !important;
+  line-height: 1.7 !important;
+  color: #33373d !important;
   border-bottom: 1px solid var(--border-light) !important;
-  padding-bottom: 12px !important;
-  margin-bottom: 14px !important;
-}
-
-.t-card__body {
-  padding: 20px !important;
 }
 
 /* 斑马纹压到几乎不可见：只起防窜行作用，不承担视觉重量 */
@@ -523,7 +476,7 @@ h4 { font-size: var(--fs-16); }
 }
 
 .t-table .t-button--text {
-  font-size: 14px !important;
+  font-size: 13px !important;
   padding: 0 6px !important;
 }
 
@@ -641,4 +594,90 @@ a:focus-visible,
 }
 *:hover {
   scrollbar-color: rgba(26, 29, 36, 0.14) transparent;
+}
+
+/* ============================================================
+   质感动效层（2026-09-11 精修）
+   纲领：电子杂志派「结构优于装饰」——动效只做引导与反馈，
+   全站统一缓动曲线：快速起手、柔和收尾（cubic-bezier 0.2/0.8）。
+   不加阴影堆叠，层级仍靠 hairline + 留白 + 字体对比。
+   ============================================================ */
+
+/* ── 统一缓动令牌 ── */
+:root,
+:root[theme-mode='light'] {
+  --ease-out-soft: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --dur-fast: 0.15s;
+  --dur-base: 0.22s;
+  --dur-slow: 0.32s;
+}
+
+/* ── 卡片/面板：hover 边界加深 + 轻微上浮（transform，无阴影堆叠）── */
+.t-card,
+.t-card__body {
+  transition:
+    transform var(--dur-base) var(--ease-out-soft),
+    border-color var(--dur-base) var(--ease-out-soft),
+    background-color var(--dur-base) var(--ease-out-soft);
+}
+
+/* ── 按钮：按下回弹（active 即时、hover 柔和），禁用不发灰堆叠 ── */
+.t-button {
+  transition:
+    background-color var(--dur-fast) var(--ease-out-soft),
+    color var(--dur-fast) var(--ease-out-soft),
+    border-color var(--dur-fast) var(--ease-out-soft),
+    transform var(--dur-fast) var(--ease-out-soft);
+}
+.t-button:not(.t-button--variant-text):not(.t-is-disabled):active {
+  transform: translateY(1px);
+}
+
+/* ── 页面主舞台淡入：路由切换不再「闪现」，方向感来自轻微上移 ── */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.t-layout__content,
+.t-admin-content,
+main {
+  animation: page-fade-in var(--dur-slow) var(--ease-out-soft) both;
+}
+
+/* ── 弹窗/抽屉：进入更柔（覆盖 TDesign 默认线性），退出保持原速 ── */
+.t-dialog,
+.t-drawer {
+  transition-timing-function: var(--ease-out-soft) !important;
+}
+.t-dialog__card {
+  animation: page-fade-in var(--dur-slow) var(--ease-out-soft) both;
+}
+
+/* ── 表格行：hover 仅加深底色（hairline 体系内反馈，行高 44px 不变）── */
+.t-table .t-table__body > tr {
+  transition: background-color var(--dur-fast) var(--ease-out-soft);
+}
+
+/* ── 标签/徽章：红章、金徽的轻呼吸仅用于关键状态（D-day 临近日），避免满屏闪 ── */
+
+/* ── 通知/消息条：统一圆角与 hairline，与卡片同族 ── */
+.t-message,
+.t-notification {
+  border-radius: var(--radius-lg) !important;
+}
+
+/* ── 图片/缩略预览：hover 轻微放大（文件预览卡片的「可点」暗示）── */
+.file-thumb,
+.preview-card img {
+  transition: transform var(--dur-base) var(--ease-out-soft);
+}
+.file-thumb:hover,
+.preview-card img:hover {
+  transform: scale(1.02);
 }

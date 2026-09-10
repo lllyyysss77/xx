@@ -21,6 +21,7 @@ import { ElectionSessionList } from '../../components/ElectionSessionList';
 import { SessionDetailBar } from '../../components/ElectionSessionList/SessionDetailBar';
 import { CellText } from '../../components/CellText';
 import { IconActions } from '../../components/IconActions';
+import { validateUploadFile, UPLOAD_ACCEPT } from '../../utils/upload';
 
 export default memo(function PositionsPage() {
   const [list, setList] = useState<Position[]>([]);
@@ -65,14 +66,20 @@ export default memo(function PositionsPage() {
     loadData();
   }, [loadData]);
 
-  // 上传岗位招募或资格审查附件
+  // 上传岗位招募或资格审查附件（先本地校验格式/大小）
   const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentPos || !e.target.files?.[0]) return;
     const file = e.target.files[0];
+    e.target.value = '';
+    const check = validateUploadFile(file);
+    if (!check.ok) {
+      MessagePlugin.warning(check.message || '文件不符合上传要求');
+      return;
+    }
     setUploading(true);
     try {
       await uploadPositionFile(currentPos.id, file);
-      MessagePlugin.success('岗位招募文件/报名样表已成功上传至服务器归档！');
+      MessagePlugin.success('样表附件已上传并归档');
       loadData();
       setDetailVisible(false);
     } catch (err: any) {
@@ -87,7 +94,7 @@ export default memo(function PositionsPage() {
     const today = new Date().toISOString().slice(0, 10);
     if (pos.applicationStart && pos.applicationEnd) {
       if (today < pos.applicationStart) return { label: '未开放报名', theme: 'default' as const };
-      if (today >= pos.applicationStart && today <= pos.applicationEnd) return { label: '竞选报名招募中', theme: 'success' as const };
+      if (today >= pos.applicationStart && today <= pos.applicationEnd) return { label: '报名进行中', theme: 'success' as const };
       return { label: '报名已截止', theme: 'warning' as const };
     }
     return { label: pos.status === 'open' ? '报名招募中' : '已截止', theme: 'primary' as const };
@@ -118,7 +125,7 @@ export default memo(function PositionsPage() {
       minWidth: 180,
       cell: ({ row }: any) => (
         <CellText
-          main={row.applicationStart ? `${row.applicationStart} 至 ${row.applicationEnd}` : '随 D-day 依法倒排'}
+          main={row.applicationStart ? `${row.applicationStart} 至 ${row.applicationEnd}` : '以法定公告为准'}
           sub="法定报名周期"
         />
       ),
@@ -129,7 +136,7 @@ export default memo(function PositionsPage() {
       minWidth: 180,
       cell: ({ row }: any) => (
         <CellText
-          main={row.materialReviewStart ? `${row.materialReviewStart} 至 ${row.materialReviewEnd}` : 'D-15 ~ D-13 初审'}
+          main={row.materialReviewStart ? `${row.materialReviewStart} 至 ${row.materialReviewEnd}` : '以法定公告为准'}
           sub="材料资格审查窗口"
         />
       ),
@@ -170,7 +177,7 @@ export default memo(function PositionsPage() {
       <div style={{ padding: 24, background: '#FAF8F5', minHeight: '100%' }}>
         <ElectionSessionList
           title="岗位管理"
-          sub="【层级铁律】先选届：换届岗位由各届提案审批通过后确定，进入具体届次后查看主任、副主任、委员等职数配额并维护报名样表。"
+          sub="岗位按届次确定：先选择具体届次，即可查看各岗位职数配额、任职要求，并维护报名样表附件。"
           data={fiefs}
           loading={loading}
           statLabel="拟设岗位/名额"
@@ -220,7 +227,7 @@ export default memo(function PositionsPage() {
       <Card
         bordered
         title={`【${currentFief.name}】换届选举岗位审计表`}
-        description="岗位职数配额由提案审批通过后锁死，法定报名与初审周期严格依法倒排（D-15 ~ D-13），此处资料直通小程序端参选人查阅。"
+        description="岗位职数配额由提案审批通过后确定，法定报名与初审周期依 D 日倒排（D-15 至 D-13）；本页信息同步供小程序端参选人查阅。"
       >
         <Table
           data={list.filter((p) => !currentFief || p.electionFiefId === currentFief.id)}
@@ -253,7 +260,7 @@ export default memo(function PositionsPage() {
                 { label: '拟选名额职数', content: `${currentPos.quota} 名` },
                 { label: '报名起止周期', content: `${currentPos.applicationStart || '—'} 至 ${currentPos.applicationEnd || '—'}` },
                 { label: '资格审核周期', content: `${currentPos.materialReviewStart || '—'} 至 ${currentPos.materialReviewEnd || '—'}` },
-                { label: '任职资格与法定条件', content: currentPos.requirement || '按照村委会/居委会选举法及换届政策规定执行', span: 2 },
+                { label: '任职资格与法定条件', content: currentPos.requirement || '按照《中华人民共和国村民委员会组织法》《中华人民共和国城市居民委员会组织法》及换届政策规定执行', span: 2 },
               ]}
             />
 
@@ -281,6 +288,7 @@ export default memo(function PositionsPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <input
                     type="file"
+                    accept={UPLOAD_ACCEPT}
                     id="pos-file-upload-input"
                     style={{ display: 'none' }}
                     onChange={handleUploadFile}

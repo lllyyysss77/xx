@@ -1,5 +1,8 @@
 # AGENTS.md — 村居换届系统后端（backend）
 
+## 前端合并记录（2026-09-11）
+web/src 已全量合并 election-system-fixed 前端优点：专业菜单（tdesign-icons 图标映射 + 业务分组）、OnboardingGuide 新手引导、utils/upload.ts 统一上传校验（validateUploadFile/UPLOAD_ACCEPT）、980px 响应式修复、全站去 emoji 政务风、上传失败明确提示。styles/index.less 追加「质感动效层」：统一缓动令牌（--ease-out-soft）、页面淡入、卡片/按钮/表格反馈、弹窗动效。
+
 ## 项目概览
 村/居（村委会、居委会）换届选举的**政务内部管理系统后端**。村、社区两套 SOP 流程基本一致，仅选举细节与岗位有差异；以 **D 日（选举日）倒排** 驱动，一套 pipeline 复用，各村/社区仅数据内容不同。
 

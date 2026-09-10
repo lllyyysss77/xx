@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Tag, Progress, Button, Space, MessagePlugin, Loading, Empty } from 'tdesign-react';
-import { CalendarIcon, TimeIcon, NotificationIcon, ChevronRightIcon } from 'tdesign-icons-react';
+import { CalendarIcon, TimeIcon, NotificationIcon, BrowseGalleryIcon } from 'tdesign-icons-react';
 import { getElectionFiefs, getFiefStages, ElectionFief, FiefStage } from '../../api/elections';
 import { getAnnouncements, Announcement } from '../../api/announcements';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useElectionStore } from '../../stores/useElectionStore';
-import { SopTimeline } from '../../components/SopTimeline';
+import OnboardingGuide, { hasOnboarded } from '../../components/OnboardingGuide';
 import Style from './Home.module.less';
 
 const fmt = (date?: string) => (date ? String(date).slice(0, 10) : '—');
@@ -21,6 +21,12 @@ export default function HomePage() {
   const [stages, setStages] = useState<FiefStage[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [guideOpen, setGuideOpen] = useState(false);
+
+  // 首次进入自动弹出使用引导；也可从右上角「使用指南」重新打开
+  useEffect(() => {
+    if (!hasOnboarded()) setGuideOpen(true);
+  }, []);
 
   const loadData = async () => {
     setLoading(true);
@@ -51,7 +57,7 @@ export default function HomePage() {
 
   const currentFief = fiefs.find((f) => f.id === currentFiefId) || fiefs[0];
 
-  // 计算距 D-day 天数（按日期真实推导，绝不假编）
+  // 计算距 D-day 天数（按日期真实推导；选举日已过则显示为负数，由展示层转文案）
   const daysLeft = useMemo(() => {
     if (!currentFief?.dDay) return 0;
     const now = new Date();
@@ -59,6 +65,7 @@ export default function HomePage() {
     const target = new Date(`${currentFief.dDay}T00:00:00Z`);
     return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, [currentFief]);
+  const dayLabel = daysLeft > 0 ? `${daysLeft}` : daysLeft === 0 ? '今天' : `选举日已过 ${Math.abs(daysLeft)} 天`;
 
   // 法定 16 阶段状态动态推导（按今日日期驱动，拒绝恒 0%）
   const derivedStages = useMemo(() => {
@@ -79,40 +86,42 @@ export default function HomePage() {
   const nextStage = derivedStages.find((s) => s.derivedStatus === 'pending');
 
   const publishedAnnouncements = useMemo(() => {
-    return announcements.filter((a) => a.status === 'published' || (a as any).annStatus === 'published').slice(0, 6);
+    return announcements.filter((a) => a.status === 'published').slice(0, 6);
   }, [announcements]);
 
   if (loading) {
-    return <Loading loading text="正在加载真实换届工作台…" fullscreen={false} />;
+    return <Loading loading text="正在加载工作台数据…" fullscreen={false} />;
   }
 
   return (
     <div className={Style.page}>
-      {/* 顶部英雄大看板（100% 对齐 后台首页.png） */}
+      <OnboardingGuide forceOpen={guideOpen} onClose={() => setGuideOpen(false)} />
+      {/* 顶部英雄大看板 */}
       <Card className={Style.heroCard} bordered={false}>
-        <div className={Style.heroHead}>
+        <div className={Style.heroHead} style={{ justifyContent: 'space-between', width: '100%' }}>
           <div>
             <div className={Style.heroOrg}>
-              {user?.orgName || currentFief?.name || '华亭镇五云村'} · {currentFief?.name || '第十五届村民委员会换届选举'}
+              {user?.orgName || '当前归属地'} · {currentFief?.name || '村居换届选举'}
             </div>
             <div className={Style.heroTitle}>依法选举 公正公开</div>
           </div>
-          <Tag theme="primary" variant="light">
-            真实政务数据
-          </Tag>
+          <Button variant="text" size="small" onClick={() => setGuideOpen(true)}>
+            <BrowseGalleryIcon style={{ marginRight: 4 }} />
+            使用指南
+          </Button>
         </div>
 
         <div className={Style.heroStats}>
           <div className={Style.heroStat}>
             <div className={Style.heroNum}>
               <span className={Style.breathDot} />
-              {daysLeft > 0 ? daysLeft : 0}
+              {dayLabel}
             </div>
-            <div className={Style.heroLbl}>距正式投票日 (天)</div>
+            <div className={Style.heroLbl}>距正式投票日（天）</div>
           </div>
           <div className={Style.heroStat}>
             <div className={Style.heroNum}>{currentFief?.dDay || '待定'}</div>
-            <div className={Style.heroLbl}>正式选举日 (D-day)</div>
+            <div className={Style.heroLbl}>正式选举日（D 日）</div>
           </div>
           <div className={Style.heroStat}>
             <div className={Style.heroNum}>{progressPercent}%</div>
@@ -120,7 +129,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <Progress percentage={progressPercent} color="#0052d9" trackColor="#eef0f4" />
+        <Progress percentage={progressPercent} color="var(--td-brand-color)" trackColor="var(--td-component-stroke, #eef0f4)" />
 
         <div className={Style.heroStage}>
           <span className={Style.heroStageDot} />
@@ -146,7 +155,7 @@ export default function HomePage() {
           }
           className={Style.colMain}
           actions={
-            <Button theme="primary" variant="text" size="medium" onClick={() => navigate('/election/announcements')}>
+            <Button variant="text" size="small" onClick={() => navigate('/election/announcements')}>
               查看全部 →
             </Button>
           }
@@ -191,9 +200,8 @@ export default function HomePage() {
           actions={
             currentFief && (
               <Button
-                theme="primary"
                 variant="text"
-                size="medium"
+                size="small"
                 onClick={() => navigate(`/election/activity/${currentFief.id}`)}
               >
                 16 阶段全景 →

@@ -26,6 +26,8 @@ import {
   ChevronRightIcon,
 } from 'tdesign-icons-react';
 import { getElectionFief, getFiefStages, ElectionFief, FiefStage } from '../../api/elections';
+import { getPositions } from '../../api/positions';
+import { validateUploadFile, UPLOAD_ACCEPT } from '../../utils/upload';
 import {
   getAnnouncements,
   saveAnnouncement,
@@ -66,6 +68,8 @@ export default function ActivityDetailPage() {
   const { user } = useAuthStore();
 
   const [fief, setFief] = useState<ElectionFief | null>(null);
+  // 选举方式（从岗位数据动态推导，不再硬编码）
+  const [electionMethodText, setElectionMethodText] = useState('以法定公告为准');
   const [stages, setStages] = useState<FiefStage[]>([]);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
@@ -158,6 +162,14 @@ export default function ActivityDetailPage() {
       setStages(stageData);
       setAnnouncements(annData);
 
+      // 动态读取本活动岗位的选举方式（去重后拼接；失败静默不影响主流程）
+      getPositions({ electionFiefId: id })
+        .then((list: any[]) => {
+          const methods = Array.from(new Set(list.map((p) => p?.electionMethod).filter(Boolean)));
+          if (methods.length > 0) setElectionMethodText(methods.join('、'));
+        })
+        .catch(() => {});
+
       if (!keepSelection && stageData.length > 0 && !selectedStageKey) {
         setSelectedStageKey(stageData[0].stageKey);
       }
@@ -229,10 +241,13 @@ export default function ActivityDetailPage() {
         currentAnnouncement.annSign ||
           (isCommunity ? `${user?.orgName || ''}居民选举委员会` : `${user?.orgName || ''}村民选举委员会`),
       );
+      // 成文日期推导链：公告已填 → 发布日期 → 活动法定选举日（D 日）→ 空；不再兑底写死日期
+      const cnDate = (iso?: string) => {
+        const d = iso ? String(iso).slice(0, 10) : '';
+        return /^\d{4}-\d{2}-\d{2}$/.test(d) ? `${d.slice(0, 4)}年${d.slice(5, 7)}月${d.slice(8, 10)}日` : '';
+      };
       setEditSignDate(
-        currentAnnouncement.annSignDate ||
-          // [TODO-FIX P2] 硬编码成文日期 fallback '2027年05月18日' — 应取活动 d_day 或当前日期，不应写死
-          (currentAnnouncement.publishedAt ? currentAnnouncement.publishedAt.slice(0, 10) : '2027年05月18日'),
+        currentAnnouncement.annSignDate || cnDate(currentAnnouncement.publishedAt) || cnDate(fief?.dDay ?? undefined),
       );
       setPublishMode(currentAnnouncement.annPublishMode || 'immediate');
       setPublishAt(currentAnnouncement.annPublishAt || '');
@@ -259,7 +274,7 @@ export default function ActivityDetailPage() {
     if (editorLocked) {
       MessagePlugin.warning(
         currentStageStatus === 'unpublished'
-          ? '⏰ 本环节已过法定截止日且未发布，考勤式锁定：禁止保存/补发'
+          ? '本环节已过法定截止日且未发布，已按规定锁定：禁止保存/补发'
           : '本公告已正式发布，内容已锁定不可修改',
       );
       return;
@@ -277,7 +292,7 @@ export default function ActivityDetailPage() {
         annRemindHours: remindHours,
         annRemindTo: remindTo.join(','),
       });
-      MessagePlugin.success('公文草稿及发文配置已成功保存！');
+      MessagePlugin.success('公文草稿及发文配置已保存');
       loadAll(true);
     } catch (err: any) {
       MessagePlugin.error(err.message || '保存草稿失败');
@@ -292,7 +307,7 @@ export default function ActivityDetailPage() {
     if (editorLocked) {
       MessagePlugin.warning(
         currentStageStatus === 'unpublished'
-          ? '⏰ 本环节已过法定截止日且未发布，考勤式锁定：禁止发布/补发，请先联系管理员线下处理'
+          ? '本环节已过法定截止日且未发布，已按规定锁定：禁止发布/补发，请先联系管理员线下处理'
           : '本公告已正式发布，不可重复发布',
       );
       return;
@@ -315,7 +330,7 @@ export default function ActivityDetailPage() {
         annRemindTo: remindTo.join(','),
       });
       await publishAnnouncement(currentAnnouncement.id);
-      MessagePlugin.success(publishMode === 'scheduled' ? `已设定定时发布：${publishAt}` : '🎉 公告已正式依法张贴发布！');
+      MessagePlugin.success(publishMode === 'scheduled' ? `已设定定时发布：${publishAt}` : '公告已正式发布');
       loadAll(true);
     } catch (err: any) {
       MessagePlugin.error(err.message || '发布失败');
@@ -324,11 +339,16 @@ export default function ActivityDetailPage() {
     }
   };
 
-  // 上传公告附件
+  // 上传公告附件（先本地校验格式/大小，再提交）
   const handleUploadAnnFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file || !currentAnnouncement) return;
+    const check = validateUploadFile(file);
+    if (!check.ok) {
+      MessagePlugin.warning(check.message || '文件不符合上传要求');
+      return;
+    }
     setUploadingAnnFile(true);
     try {
       await uploadAnnouncementFile(currentAnnouncement.id, file);
@@ -444,7 +464,7 @@ export default function ActivityDetailPage() {
   const editorLocked = isPublished || currentStageStatus === 'unpublished';
 
   if (loading) {
-    return <Loading loading text="正在加载选举活动全貌…" fullscreen={false} />;
+    return <Loading loading text="正在加载活动工作台…" fullscreen={false} />;
   }
 
   if (!fief) {
@@ -476,15 +496,15 @@ export default function ActivityDetailPage() {
             {STATUS_META[fief.status]?.label || fief.status}
           </Tag>
           <span>归属组织：{user?.orgType === 'community' ? '城市社区居委会' : '农村村民委员会'}</span>
-          {/* [TODO-FIX P2] 硬编码 "选举方式：全民直接选举" — 应读 positions.election_method 字段动态渲染 */}
-          <span>选举方式：全民直接选举</span>
+          {/* [FIXED P2 2026-09-10] 选举方式改为动态读取岗位数据，不再硬编码 */}
+          <span>选举方式：{electionMethodText}</span>
           <span className={Style.dday}>
-            正式选举日 (D-day)：<b>{fief.dDay}</b>
+            正式选举日（D 日）：<b>{fief.dDay}</b>
           </span>
         </div>
       </div>
 
-      {/* 主体两栏：左 16 阶段流程轴 ｜ 右 小编一站式工作台 */}
+      {/* 主体两栏：左 16 阶段流程轴 ｜ 右经办一站式工作台 */}
       <div className={Style.mainGrid}>
         {/* 左栏：16 阶段流程时间轴 */}
         <div className={Style.leftCol}>
@@ -494,10 +514,10 @@ export default function ActivityDetailPage() {
               D = 正式选举日（{fief.dDay}）。点选左侧任一阶段，即可在右侧工作台一站式完成该阶段的公告起草、附件归档、申报通道与提醒设置。
             </div>
 
-            {/* 📌 今日进度直观指示条 */}
+            {/* 今日进度直观指示条 */}
             <div className={Style.todayAnchorBar}>
-              <span className={Style.todayTag}>📌 今日：{todayStr}</span>
-              <span className={Style.todayTip}>系统已根据今日进度与发文事实自动点亮状态</span>
+              <span className={Style.todayTag}>今日：{todayStr}</span>
+              <span className={Style.todayTip}>系统已根据今日进度与发文记录自动标记各阶段状态</span>
             </div>
 
             <Timeline mode="same" className={Style.timeline}>
@@ -557,7 +577,7 @@ export default function ActivityDetailPage() {
                             </GuideTip>
                           )}
                           {ss === 'unpublished' && (
-                            <GuideTip content="⏰ 本环节已过法定截止日但系统未检测到发布记录：考勤式锁定，右栏仅可查看，禁止事后补发（需管理员线下核准）。" placement="top">
+                            <GuideTip content="本环节已过法定截止日但系统未检测到发布记录：按规定锁定，右栏仅可查看，禁止事后补发（需管理员线下核准）。" placement="top">
                               <Tag size="small" theme="warning" variant="light" icon={<ErrorCircleFilledIcon />}>
                                 未发布 · 已过期锁定
                               </Tag>
@@ -622,7 +642,7 @@ export default function ActivityDetailPage() {
           <div className={`${Style.card} ${Style.workbench}`}>
             <div className={Style.wbTitle}>
               <span className={Style.bar} />
-              <span>小编工作台 · {currentStage?.stageName || '阶段工作'}</span>
+              <span>经办工作台 · {currentStage?.stageName || '阶段工作'}</span>
             </div>
             {currentStage && (
               <div className={Style.wbSub}>
@@ -682,7 +702,7 @@ export default function ActivityDetailPage() {
                         editorLocked
                           ? isPublished
                             ? '本公告已正式发布留痕，内容已锁定不可修改'
-                            : '⏰ 本环节已过法定截止日且未发布，系统已按考勤规则锁定编辑器（禁止补发），内容仅供查阅'
+                            : '本环节已过法定截止日且未发布，系统已按规定锁定编辑器（禁止补发），内容仅供查阅'
                           : '请输入公告正文'
                       }
                     />
@@ -691,7 +711,7 @@ export default function ActivityDetailPage() {
                         预览红头大字排版
                       </Button>
                       {isPublished && (
-                        <GuideTip content="🔒 本公文已正式依法发布并加盖电子签章留痕，所有表单已进入法定只读锁定状态。" placement="top">
+                        <GuideTip content="本文书已正式依法发布并留痕，所有表单已进入只读锁定状态。" placement="top">
                           <Tag size="small" theme="success" variant="light" icon={<CheckCircleFilledIcon />}>
                             已正式发布（只读留痕）
                           </Tag>
@@ -699,7 +719,7 @@ export default function ActivityDetailPage() {
                       )}
                       {!isPublished && currentStageStatus === 'unpublished' && (
                         <GuideTip
-                          content="⏰ 本环节已过法定截止日但无发布记录，已按考勤规则锁定编辑器：错过即失效，禁止事后补发。如需补正请联系管理员线下核准。"
+                          content="本环节已过法定截止日但无发布记录，已按规定锁定编辑器：错过即失效，禁止事后补发。如需补正请联系管理员线下核准。"
                           placement="top"
                         >
                           <Tag size="small" theme="warning" variant="light" icon={<ErrorCircleFilledIcon />}>
@@ -708,7 +728,7 @@ export default function ActivityDetailPage() {
                         </GuideTip>
                       )}
                       {!isPublished && currentStageStatus !== 'unpublished' && (
-                        <GuideTip content="💡 建议在点击「确认依法发布」前，先通过「预览红头大字排版」核对红头字号与落款，确保公文严肃合规。" placement="top">
+                        <GuideTip content="建议在点击「确认依法发布」前，先通过「预览红头大字排版」核对红头字号与落款，确保公文严肃合规。" placement="top">
                           <Tag size="small" theme="primary" variant="light">
                             待发布核校
                           </Tag>
@@ -732,7 +752,7 @@ export default function ActivityDetailPage() {
                       style={{ width: 220 }}
                       value={editSignDate}
                       onChange={setEditSignDate}
-                      placeholder="成文日期，如 2027年05月18日"
+                      placeholder="成文日期（如 2026年09月10日）"
                       disabled={editorLocked}
                     />
                   </div>
@@ -748,6 +768,7 @@ export default function ActivityDetailPage() {
                       type="file"
                       ref={annFileInputRef}
                       style={{ display: 'none' }}
+                      accept={UPLOAD_ACCEPT}
                       onChange={handleUploadAnnFile}
                     />
                     <Button
@@ -760,19 +781,19 @@ export default function ActivityDetailPage() {
                     >
                       上传红头扫描件 / 附件
                     </Button>
-                    <span className={Style.wbHint}>支持 PDF / Word / 图片格式扫描件</span>
+                    <span className={Style.wbHint}>支持 PDF / Word / 图片 / ZIP / TXT，不超过 20MB</span>
                   </div>
 
                   {annFiles.length > 0 && (
                     <div style={{ marginTop: 8 }}>
                       {annFiles.map((f) => (
-                        <div key={f.id} style={{ fontSize: 13, color: '#0052d9', marginTop: 4 }}>
+                        <div key={f.id} style={{ fontSize: 13, color: 'var(--td-brand-color)', marginTop: 4 }}>
                           {f.storageKey && /^[a-f0-9]{32}(\.[a-zA-Z0-9]{1,10})?$/.test(f.storageKey) ? (
                             <a href={getFileUrl(f.storageKey)} target="_blank" rel="noreferrer">
-                              📎 {f.fileName}
+                              {f.fileName}
                             </a>
                           ) : (
-                            <span style={{ color: '#999' }}>📎 {f.fileName}（文件缺失）</span>
+                            <span style={{ color: 'var(--td-text-color-disabled, #999)' }}>{f.fileName}（文件缺失）</span>
                           )}
                         </div>
                       ))}
@@ -781,8 +802,8 @@ export default function ActivityDetailPage() {
 
                   <div className={Style.wbRow} style={{ marginTop: 14 }}>
                     <Switch value={openMaterial} onChange={setOpenMaterial} disabled={editorLocked} />
-                    <span className={Style.wbHint} style={{ color: '#1A1A1A', fontWeight: 600 }}>
-                      开启群众申报通道（开启后，微信小程序端本公告下方将浮现「提交参选材料」按钮）
+                    <span className={Style.wbHint} style={{ fontWeight: 600 }}>
+                      开启参选申报通道（开启后，微信小程序端本公告下方将出现「提交参选材料」入口）
                     </span>
                   </div>
                 </div>
@@ -837,7 +858,7 @@ export default function ActivityDetailPage() {
                       <Tag size="small" theme={isPublished ? 'success' : 'warning'} variant="light">
                         {isPublished
                           ? '此公告已正式发布，内容为法定公示留痕，不可修改'
-                          : '⏰ 已过法定截止日且未发布：考勤式锁定，禁止保存/补发；如需补正请联系管理员线下核准'}
+                          : '已过法定截止日且未发布：已锁定，禁止保存/补发；如需补正请联系管理员线下核准'}
                       </Tag>
                     ) : (
                       <>

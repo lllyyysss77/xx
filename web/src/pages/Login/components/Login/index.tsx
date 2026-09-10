@@ -19,8 +19,9 @@ import Style from './index.module.less';
 
 const { FormItem } = Form;
 
-const DEFAULT_PHONE = '13800000001';
-const DEFAULT_PASSWORD = '123456';
+// 演示环境默认账号（仅演示项目预填，便于快速体验；正式环境应置空）
+const DEMO_PHONE = '13800000001';
+const DEMO_PASSWORD = '123456';
 
 export default function Login() {
   const [showPsw, toggleShowPsw] = useState(false);
@@ -43,9 +44,8 @@ export default function Login() {
         if (!alive) return;
         setAllOrgs(list || []);
         if (list?.length) {
-          const preferred = list.find((o) => o.name.includes('霞皋') || o.slug.includes('xiagao'))
-            || list.find((o) => o.orgType === 'village')
-            || list[0];
+          // 默认选中第一个村：不做特定村硬编码偏好
+          const preferred = list.find((o) => o.orgType === 'village') || list[0];
           if (preferred) {
             setSelectedOrg(preferred);
             setFilterType(preferred.orgType as 'village' | 'community');
@@ -62,8 +62,8 @@ export default function Login() {
     if (loading || !formRef.current) return;
     formRef.current.setFieldsValue({
       organizationId: selectedOrg?.id || '',
-      phone: DEFAULT_PHONE,
-      password: DEFAULT_PASSWORD,
+      phone: DEMO_PHONE,
+      password: DEMO_PASSWORD,
     });
   }, [loading, selectedOrg]);
 
@@ -109,8 +109,8 @@ export default function Login() {
         {/* ① 村/社区双轨切换 */}
         <div style={{ marginBottom: 16, textAlign: 'center' }}>
           <Radio.Group variant="default-filled" value={filterType} onChange={(v) => setFilterType(v as any)} size="large">
-            <Radio.Button value="village">🏡 农村行政村</Radio.Button>
-            <Radio.Button value="community">🏘 城市社区</Radio.Button>
+            <Radio.Button value="village">农村行政村</Radio.Button>
+            <Radio.Button value="community">城市社区</Radio.Button>
           </Radio.Group>
         </div>
 
@@ -125,7 +125,7 @@ export default function Login() {
               <span style={{ color: 'var(--td-text-color-placeholder)' }}>加载中…</span>
             ) : selectedOrg ? (
               <span style={{ color: 'var(--td-text-color-primary)' }}>
-                {selectedOrg.orgType === 'community' ? '🏘' : '🏡'} {selectedOrg.name}
+                {selectedOrg.orgType === 'community' ? '社区' : '村'} · {selectedOrg.name}
               </span>
             ) : (
               <span style={{ color: 'var(--td-text-color-placeholder)' }}>请选择{typeLabel}</span>
@@ -145,7 +145,7 @@ export default function Login() {
             size="large"
             type={showPsw ? 'text' : 'password'}
             clearable
-            placeholder="请输入密码（默认 123456）"
+            placeholder="请输入密码"
             prefixIcon={<LockOnIcon />}
             suffixIcon={
               showPsw
@@ -155,8 +155,8 @@ export default function Login() {
           />
         </FormItem>
 
-        <div style={{ fontSize: 12, color: '#888', marginBottom: 16, lineHeight: 1.6 }}>
-          注：村居内部工作账号由平台超级管理员统一分配开通；登录后可在个人中心自主修改密码。
+        <div style={{ fontSize: 12, color: 'var(--td-text-color-secondary, #888)', marginBottom: 16, lineHeight: 1.6 }}>
+          注：村居内部工作账号由平台管理员统一开通分配；忘记密码请联系本单位管理员重置。
         </div>
 
         <FormItem>
@@ -180,7 +180,7 @@ export default function Login() {
         <div className={Style.orgList}>
           {villageList.length > 0 && (
             <div className={Style.orgGroup}>
-              <div className={Style.orgGroupTitle}>🏡 农村行政村</div>
+              <div className={Style.orgGroupTitle}>农村行政村</div>
               {villageList.map((org) => (
                 <div
                   key={org.id}
@@ -197,7 +197,7 @@ export default function Login() {
           )}
           {communityList.length > 0 && (
             <div className={Style.orgGroup}>
-              <div className={Style.orgGroupTitle}>🏘 城市社区</div>
+              <div className={Style.orgGroupTitle}>城市社区</div>
               {communityList.map((org) => (
                 <div
                   key={org.id}

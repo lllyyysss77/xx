@@ -17,9 +17,7 @@ export default memo((props: IProps) => {
 
   return (
     <div className={Style.menuLogo} onClick={handleClick}>
-      <span style={{ fontSize: '16px', fontWeight: 600, letterSpacing: '1px' }}>
-        {props.collapsed ? '换' : '换届选举系统 v1'}
-      </span>
+      {props.collapsed ? <MiniLogo /> : <FullLogo />}
     </div>
   );
 });
