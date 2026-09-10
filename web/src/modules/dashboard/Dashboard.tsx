@@ -43,6 +43,20 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
+  /* 键盘可达跳转（政务无障碍验收）：鼠标点、Tab 聚焦、Enter/空格 均可触发 */
+  const go = (path: string) => ({
+    role: 'button' as const,
+    tabIndex: 0,
+    style: { cursor: 'pointer' },
+    onClick: () => navigate(path),
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        navigate(path);
+      }
+    },
+  });
+
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -129,12 +143,12 @@ export default function DashboardPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 120,
+      width: 140,
       cell: ({ row }: any) => (
         <Button
           theme="primary"
-          variant="text"
-          size="small"
+          variant="outline"
+          size="medium"
           onClick={() => navigate(row.link)}
         >
           前往处理
@@ -185,72 +199,72 @@ export default function DashboardPage() {
       {/* 六大关键指标统计卡片 */}
       <Row gutter={16} style={{ marginBottom: 24 }}>
         <Col span={4}>
-          <div onClick={() => navigate('/election/activities')} style={{ cursor: 'pointer' }}>
+          <div {...go('/election/activities')}>
             <Card bordered hoverShadow>
-              <div style={{ color: '#888', fontSize: 13 }}>当届选举活动</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#0052d9', marginTop: 4 }}>
+              <div style={{ color: 'var(--text-3)', fontSize: 13 }}>当届选举活动</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-primary)', marginTop: 4 }}>
                 {fiefs.length}
               </div>
-              <div style={{ fontSize: 12, color: '#00a870', marginTop: 4 }}>D-day 已倒排锁死</div>
+              <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 4 }}>D-day 已倒排锁死</div>
             </Card>
           </div>
         </Col>
         <Col span={4}>
-          <div onClick={() => navigate('/election/positions')} style={{ cursor: 'pointer' }}>
+          <div {...go('/election/positions')}>
             <Card bordered hoverShadow>
-              <div style={{ color: '#888', fontSize: 13 }}>本届拟设岗位</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#1d2129', marginTop: 4 }}>
+              <div style={{ color: 'var(--text-3)', fontSize: 13 }}>本届拟设岗位</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--text-1)', marginTop: 4 }}>
                 {positions.length}
               </div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>总拟选职数：{positions.reduce((s, p) => s + (p.quota || 1), 0)} 人</div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>总拟选职数：{positions.reduce((s, p) => s + (p.quota || 1), 0)} 人</div>
             </Card>
           </div>
         </Col>
         <Col span={4}>
-          <div onClick={() => navigate('/election/materials')} style={{ cursor: 'pointer' }}>
+          <div {...go('/election/materials')}>
             <Card bordered hoverShadow>
-              <div style={{ color: '#888', fontSize: 13 }}>报名材料上报</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#fa8c16', marginTop: 4 }}>
+              <div style={{ color: 'var(--text-3)', fontSize: 13 }}>报名材料上报</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-warning)', marginTop: 4 }}>
                 {materials.length}
               </div>
-              <div style={{ fontSize: 12, color: submittedMaterials.length > 0 ? '#fa8c16' : '#888', marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: submittedMaterials.length > 0 ? 'var(--color-warning)' : 'var(--text-3)', marginTop: 4 }}>
                 待初审：{submittedMaterials.length} 份
               </div>
             </Card>
           </div>
         </Col>
         <Col span={4}>
-          <div onClick={() => navigate('/election/candidates')} style={{ cursor: 'pointer' }}>
+          <div {...go('/election/candidates')}>
             <Card bordered hoverShadow>
-              <div style={{ color: '#888', fontSize: 13 }}>候选人联审池</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#00a870', marginTop: 4 }}>
+              <div style={{ color: 'var(--text-3)', fontSize: 13 }}>候选人联审池</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-success)', marginTop: 4 }}>
                 {candidates.length}
               </div>
-              <div style={{ fontSize: 12, color: '#00a870', marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 4 }}>
                 四轮联审中：{reviewingCandidates.length} 人
               </div>
             </Card>
           </div>
         </Col>
         <Col span={4}>
-          <div onClick={() => navigate('/election/announcements')} style={{ cursor: 'pointer' }}>
+          <div {...go('/election/announcements')}>
             <Card bordered hoverShadow>
-              <div style={{ color: '#888', fontSize: 13 }}>法定公文发文</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#2ba471', marginTop: 4 }}>
+              <div style={{ color: 'var(--text-3)', fontSize: 13 }}>法定公文发文</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-primary)', marginTop: 4 }}>
                 {announcements.length}
               </div>
-              <div style={{ fontSize: 12, color: '#888', marginTop: 4 }}>已发布：{announcements.filter((a) => a.status === 'published').length} 篇</div>
+              <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>已发布：{announcements.filter((a) => a.status === 'published').length} 篇</div>
             </Card>
           </div>
         </Col>
         <Col span={4}>
-          <div onClick={() => navigate('/election/proposals')} style={{ cursor: 'pointer' }}>
+          <div {...go('/election/proposals')}>
             <Card bordered hoverShadow>
-              <div style={{ color: '#888', fontSize: 13 }}>换届选举提案</div>
-              <div style={{ fontSize: 28, fontWeight: 700, color: '#0052d9', marginTop: 4 }}>
+              <div style={{ color: 'var(--text-3)', fontSize: 13 }}>换届选举提案</div>
+              <div style={{ fontSize: 28, fontWeight: 700, color: 'var(--color-primary)', marginTop: 4 }}>
                 {proposals.length}
               </div>
-              <div style={{ fontSize: 12, color: pendingProposals.length > 0 ? '#fa8c16' : '#888', marginTop: 4 }}>
+              <div style={{ fontSize: 12, color: pendingProposals.length > 0 ? 'var(--color-warning)' : 'var(--text-3)', marginTop: 4 }}>
                 待审批：{pendingProposals.length} 项
               </div>
             </Card>
@@ -261,7 +275,7 @@ export default function DashboardPage() {
       {/* 待办事项全流程联动看板 */}
       <Card
         title="实时法定业务待办事项"
-        description="全模块待办自动汇总。所有事项均由 D-day Pipeline 时间节点依法触发。"
+        description="全模块待办自动汇总。所有事项均由 D-day 法定时间节点依法触发。"
       >
         <Table data={todoList} columns={todoColumns} rowKey="id" loading={loading} />
       </Card>

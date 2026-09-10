@@ -14,7 +14,7 @@ interface LegalDocViewerProps {
 
 export const LegalDocViewer: React.FC<LegalDocViewerProps> = ({
   announcement,
-  orgName = '演示单位',
+  orgName = '本单位',
   orgType = 'village',
 }) => {
   const isCommunity = orgType === 'community';

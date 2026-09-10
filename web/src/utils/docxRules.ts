@@ -15,6 +15,13 @@ export interface DocxStageItem {
 }
 
 // 甲方村委会线 16 阶段完整业务映射（与数据库 stage_templates village 对齐）
+// ============================================================
+// [TAG-INDEX] docxRules.ts — 前端日程定义（16 阶段，村/居双轨）
+// [CORE-FLOW]    L18    VILLAGE_DOCX_STAGES — 村 16 阶段定义（含 rep_election/primary_election）
+// [CORE-FLOW]    L150   COMMUNITY_DOCX_STAGES — 村→居映射（村民→居民等）
+// [FIXED P0-3 2026-09-09] 前后端已统一为 16 阶段：后端 rebuild-db.mjs / init-local-db.mjs 的 stage_templates 已修正（含 rep_election/primary_election，voter_list D-28~-24），以权威 docx 为准。前端 docxRules.ts 与后端一致。
+//   - 历史问题：后端曾为过时 14 阶段（缺 rep_election/primary_election，voter_list 错放 D-20），已修复。
+// ============================================================
 export const VILLAGE_DOCX_STAGES: DocxStageItem[] = [
   {
     stageKey: 'prep',
@@ -57,6 +64,7 @@ export const VILLAGE_DOCX_STAGES: DocxStageItem[] = [
     systemAction: '无材料、候选人操作',
   },
   {
+    // [FIXED P0-3] rep_election 代表选举阶段 — 前后端均已包含（16 阶段统一）
     stageKey: 'rep_election',
     offsetLabel: 'D-20~D-16',
     stageName: '村民代表和村民小组长选举',
@@ -85,16 +93,16 @@ export const VILLAGE_DOCX_STAGES: DocxStageItem[] = [
     offsetLabel: 'D-13',
     stageName: '初步候选人汇总+镇级初审',
     workItems: '汇总全部自荐 / 联名人员，镇级资格初审',
-    announcementNums: '第8号',
-    systemAction: '✅停止接收新的提名与材料上报\n✅完成第一轮材料初审\n✅第二轮审核：镇级资格初审完成，公示 8 号公告',
+    announcementNums: '第8号 / 第2-1号',
+    systemAction: '✅停止接收新的提名与材料上报\n✅完成第一轮材料初审\n✅第二轮审核：镇级资格初审完成，公示 8 号公告\n✅选委会成员被提名者依法自动辞职，按原推选结果依次递补并发布第2-1号公告',
   },
   {
     stageKey: 'primary_election',
     offsetLabel: 'D-12~D-10',
     stageName: '竞选预选',
     workItems: '按差额比例组织竞选预选，确定初步候选人排序',
-    announcementNums: '预选办法公告 / 预选结果公告',
-    systemAction: '✅预选执行与结果录入；无新增材料上报',
+    announcementNums: '第18号 / 第19号',
+    systemAction: '✅预选执行与结果录入；发布第18号预选办法公告、第19号预选结果公告；无新增材料上报',
   },
   {
     stageKey: 'joint_review',
@@ -116,8 +124,8 @@ export const VILLAGE_DOCX_STAGES: DocxStageItem[] = [
     stageKey: 'campaign_prep',
     offsetLabel: 'D-3~D-1',
     stageName: '投票竞选筹备',
-    workItems: '确定监票、计票、流动票箱、代写人员；印制选票、布置会场',
-    announcementNums: '第10号 / 第11号 / 第12号 / 第13号 / 第14号',
+    workItems: '确定监票、计票、流动票箱、代写人员；印制选票、布置会场；认定无效票标准',
+    announcementNums: '第10号 / 第11号 / 第12号 / 第13号 / 第14号 / 第15号',
     systemAction: '✅竞选筹备期，无新增候选人操作，仅公示竞选配套规则',
   },
   {
@@ -125,7 +133,7 @@ export const VILLAGE_DOCX_STAGES: DocxStageItem[] = [
     offsetLabel: 'D日',
     stageName: '正式投票选举',
     workItems: '现场集中投票 + 流动票箱上门投票、当众开箱计票、当场公布当选结果',
-    announcementNums: '第15号 / 第16号 / 第17号',
+    announcementNums: '第16号 / 第17号',
     systemAction: '✅投票选举执行，录入并发布最终当选人员',
   },
   {

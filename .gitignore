@@ -45,3 +45,5 @@ _dirty_data_backup_*.json
 _dbbak_*.json
 .cozeproj/reduction
 .codegraph
+*.zip
+assets/

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from 'layouts/index';
 
-import 'tdesign-react/es/style/index.css';
+// tdesign 样式由 index.html CDN 引入，不再本地打包
 import './styles/index.less';
 
 // 政务后台固定浅色主题（不保留 starter 深色/换肤）

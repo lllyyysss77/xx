@@ -18,6 +18,8 @@ import { StatusTag } from '../../components/StatusTag';
 import { LegalDocViewer } from '../../components/LegalDocViewer';
 import { ElectionSessionList } from '../../components/ElectionSessionList';
 import { SessionDetailBar } from '../../components/ElectionSessionList/SessionDetailBar';
+import { CellText } from '../../components/CellText';
+import { IconActions } from '../../components/IconActions';
 
 export default function AnnouncementsPage() {
   const [list, setList] = useState<Announcement[]>([]);
@@ -36,9 +38,13 @@ export default function AnnouncementsPage() {
   // 初始化加载活动
   useEffect(() => {
     getElectionFiefs().then((data) => {
-      setFiefs(data);
-      if (data.length > 0) {
-        const target = currentFiefId || data[0].id;
+      // 本页活动列表按创建时间倒序：最新创建的排最前（后端默认按 d_day 降序返回）
+      const sortedFiefs = [...data].sort((a, b) =>
+        String(b.createdAt || '').localeCompare(String(a.createdAt || '')),
+      );
+      setFiefs(sortedFiefs);
+      if (sortedFiefs.length > 0) {
+        const target = currentFiefId || sortedFiefs[0].id;
         setSelectedFiefId(target);
       }
     });
@@ -62,31 +68,27 @@ export default function AnnouncementsPage() {
     loadData();
   }, [selectedFiefId]);
 
+  // [REUSE] 列收口：文号(templateCode)是主键、公文名称自适应换行、状态/时间/图标查看，删除与标题重复的“对应法定模板”列
   const columns = [
     {
-      colKey: 'idx',
-      title: '序号',
-      width: 80,
-      cell: ({ rowIndex }: any) => rowIndex + 1,
-    },
-    {
-      colKey: 'title',
-      title: '公文名称 / 标题',
-      width: 320,
+      colKey: 'templateCode',
+      title: '文号',
+      width: 92,
       cell: ({ row }: any) => (
-        <span style={{ fontWeight: 500, color: '#1d2129' }}>{row.title}</span>
+        <span style={{ fontWeight: 600, color: 'var(--color-primary)', whiteSpace: 'nowrap' }}>
+          {row.templateCode || '—'}
+        </span>
       ),
     },
     {
-      colKey: 'templateName',
-      title: '对应法定模板',
-      width: 180,
-      cell: ({ row }: any) => <span style={{ color: '#86909c' }}>{row.templateName || '法定正文模板'}</span>,
+      colKey: 'title',
+      title: '公文名称',
+      cell: ({ row }: any) => <CellText main={row.title} sub={row.templateName || undefined} />,
     },
     {
       colKey: 'status',
-      title: '发布状态（小编留痕）',
-      width: 140,
+      title: '状态',
+      width: 116,
       cell: ({ row }: any) => {
         const isPub = row.status === 'published';
         return (
@@ -95,38 +97,38 @@ export default function AnnouncementsPage() {
             variant="light"
             icon={isPub ? <CheckCircleIcon /> : <TimeIcon />}
           >
-            {isPub ? '已依法发布' : '草稿待发布'}
+            {isPub ? '已发布' : '待发布'}
           </Tag>
         );
       },
     },
     {
       colKey: 'publishedAt',
-      title: '发布时间戳',
-      width: 180,
+      title: '发布时间',
+      width: 168,
       cell: ({ row }: any) => (
-        <span style={{ fontSize: 13, color: '#4e5969' }}>
-          {row.publishedAt || '—'}
+        <span style={{ fontSize: 13, color: 'var(--text-2)', fontVariantNumeric: 'tabular-nums' }}>
+          {row.publishedAt ? String(row.publishedAt).replace('T', ' ').slice(0, 16) : '—'}
         </span>
       ),
     },
     {
       colKey: 'op',
-      title: '操作',
-      width: 140,
+      title: '查看',
+      width: 64,
       cell: ({ row }: any) => (
-        <Button
-          theme="primary"
-          variant="text"
-          size="small"
-          icon={<BrowseIcon />}
-          onClick={() => {
-            setCurrentAnn(row);
-            setPreviewVisible(true);
-          }}
-        >
-          查看公文全文
-        </Button>
+        <IconActions
+          items={[
+            {
+              icon: <BrowseIcon />,
+              title: '查看公文全文',
+              onClick: () => {
+                setCurrentAnn(row);
+                setPreviewVisible(true);
+              },
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -139,7 +141,7 @@ export default function AnnouncementsPage() {
       <div style={{ padding: 24, background: '#FAF8F5', minHeight: '100%' }}>
         <ElectionSessionList
           title="公告通知管理"
-          sub="【层级铁律】先选届：14 阶段公文草稿与正式公告按活动（届）全套归卷，进入具体届次后核验红头公文发文留痕。"
+          sub="【层级铁律】先选届：16 阶段公文草稿与正式公告按活动（届）全套归卷，进入具体届次后核验红头公文发文留痕。"
           data={fiefs}
           loading={loading}
           statLabel="已发/总公文"
@@ -214,7 +216,7 @@ export default function AnnouncementsPage() {
         {currentAnn && (
           <LegalDocViewer
             announcement={currentAnn}
-            orgName={user?.orgName || '演示单位'}
+            orgName={user?.orgName || '本单位'}
             orgType={user?.orgType || 'village'}
           />
         )}

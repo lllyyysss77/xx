@@ -39,6 +39,6 @@ export const getElectionFiefs = (params?: { termId?: string; status?: string }):
 // 活动详情
 export const getElectionFief = (id: string): Promise<ElectionFief> => request.get(`/admin/election-fiefs/${id}`);
 
-// 14 阶段日程
+// 16 阶段日程
 export const getFiefStages = (fiefId: string): Promise<FiefStage[]> =>
   request.get(`/admin/election-fiefs/${fiefId}/stages`);

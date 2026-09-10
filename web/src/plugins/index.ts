@@ -20,6 +20,8 @@ const Users = lazy(() => import('../modules/users/Users'));
 const Roles = lazy(() => import('../modules/roles/Roles'));
 const Notifications = lazy(() => import('../modules/notifications/Notifications'));
 const OrgSetup = lazy(() => import('../modules/orgsetup/OrgSetup'));
+const ScheduleBoard = lazy(() => import('../modules/schedule/ScheduleBoard'));
+const DutyAuditLogs = lazy(() => import('../modules/audit/DutyAuditLogs'));
 
 export const ALL_MODULES: BusinessModule[] = [
   // —— 选举业务 ——
@@ -69,6 +71,15 @@ export const ALL_MODULES: BusinessModule[] = [
         component: ActivityDetail,
       },
     ],
+  },
+  {
+    key: 'schedule',
+    name: '倒排工期表',
+    path: '/election/schedule',
+    icon: 'time',
+    category: 'election',
+    order: 5,
+    component: ScheduleBoard,
   },
   {
     key: 'positions',
@@ -169,6 +180,16 @@ export const ALL_MODULES: BusinessModule[] = [
     category: 'admin',
     order: 4,
     component: OrgSetup,
+  },
+  {
+    key: 'duty-audit',
+    name: '经办履职留痕',
+    path: '/admin/duty-audit',
+    icon: 'time',
+    roles: ['platform_admin', 'sub_admin'],
+    category: 'admin',
+    order: 5,
+    component: DutyAuditLogs,
   },
 ];
 

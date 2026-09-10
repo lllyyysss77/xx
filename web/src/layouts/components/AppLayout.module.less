@@ -6,12 +6,14 @@
 
 .sideContainer {
   flex: 1;
-  min-width: 760px;
+  /* 低端设备基准：980 视口 - 侧栏 232 仍有 748，不再强制 760 触发横向滚动 */
+  min-width: 700px;
   overflow: auto;
 }
 
 .topPanel {
-  min-width: 1150px;
+  /* 原 1110 会在 1040-1100 视口强制横向滚动（夏夏基准：主体 980 + 右侧 60-120） */
+  min-width: 1024px;
 }
 
 .mixPanel {

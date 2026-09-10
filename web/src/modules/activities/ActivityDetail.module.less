@@ -16,48 +16,73 @@
 /* 顶部信息头 */
 .header {
   background: #ffffff;
-  border-radius: 8px;
-  padding: 16px 20px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-  border: 1px solid #E8E5E0;
+  border-radius: var(--radius-xl);
+  padding: 18px 24px;
+  box-shadow: 0 2px 12px rgba(30, 58, 138, 0.04), 0 1px 3px rgba(0, 0, 0, 0.03);
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-primary) 0%, #6a86d6 100%);
+  }
 }
 
 .headerTitle {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--text-1);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  letter-spacing: 0.3px;
 }
 
 .bar {
   width: 4px;
-  height: 18px;
-  background: #B22222;
+  height: 20px;
+  background: linear-gradient(180deg, #4a67c0 0%, var(--color-primary) 100%);
   border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(30, 58, 138, 0.3);
 }
 
 .headerSub {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-top: 8px;
+  gap: 20px;
+  margin-top: 10px;
   font-size: 13px;
-  color: #666;
+  color: #555555;
   flex-wrap: wrap;
 }
 
-.dday b {
-  color: #B22222;
-  font-weight: 700;
-  margin-left: 4px;
+.dday {
+  background: #FFF5F5;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid #FFD0D0;
+  color: #666;
 }
 
-/* 左右两栏网格：左 420px 流程，右工作台 */
+.dday b {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-left: 6px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 左右两栏网格：左 480px 流程，右工作台 */
 .mainGrid {
   display: grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 480px 1fr;
   gap: 16px;
   align-items: start;
 }
@@ -98,15 +123,52 @@
 .cardTitle {
   font-size: 15px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--text-1);
   margin-bottom: 6px;
 }
 
 .stageHint {
   font-size: 12px;
-  color: #7A7A7A;
+  color: var(--text-3);
   margin-bottom: 14px;
   line-height: 1.5;
+}
+
+.todayAnchorBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FFF5F5;
+  border: 1px solid #FFD4D2;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--color-primary);
+  gap: 8px;
+}
+
+.todayTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--color-primary);
+  color: #FFFFFF;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.todayTip {
+  color: var(--seal);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: right;
+  font-weight: 600;
 }
 
 .timeline {
@@ -122,33 +184,95 @@
 .tlDate {
   font-size: 12px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--text-1);
 }
 
 .tlKey {
   font-size: 10px;
-  color: #86909C;
+  color: var(--text-3);
 }
 
-/* 左侧阶段卡片 */
+/* 左侧阶段卡片：卡片干净清爽，主次分明，大龄阿姨一秒识别 */
 .stageCard {
-  background: #F5F3F0;
-  border: 1px solid #E8E5E0;
-  border-radius: 6px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+  padding: 14px 40px 14px 16px;
+  margin-bottom: 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
 .stageCard:hover {
-  background: #FFF5F5;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(30, 58, 138, 0.08);
 }
 
+/* 右侧箭头：明确提示卡片可点击 */
+.stageChevron {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3); /* 原 #a0aec0 仅 2.26:1 */
+  font-size: 18px;
+  transition: all 0.2s;
+  pointer-events: none;
+}
+.stageCard:hover .stageChevron {
+  color: var(--color-primary);
+  transform: translateY(-50%) translateX(3px);
+}
+.stageSelected .stageChevron {
+  color: var(--color-primary);
+}
+
+/* 状态色（用令牌，不写硬色 —— 治根两套色系打架）：
+   原 #10b981/#3b82f6/#f59e0b 是 Tailwind 调色板，与全站墨蓝 #1e3a8a 不是同族，
+   且 #10b981 在白底仅 2.54:1、#f59e0b 仅 2.15:1（WCAG AA 非文本需 ≥3:1，均不达标）。
+   统一收口到 --color-success / --color-primary / --color-warning，对比度全部达标。 */
+.stage-done {
+  background: #ffffff !important;
+  border-left: 4px solid var(--color-success) !important; /* 5.29:1 PASS */
+}
+.stage-done:hover {
+  background: var(--bg-hover) !important;
+}
+
+.stage-current {
+  background: #ffffff !important;
+  border-left: 4px solid var(--color-primary) !important; /* 10.36:1 PASS */
+  box-shadow: 0 2px 8px rgba(30, 58, 138, 0.12) !important;
+}
+.stage-current:hover {
+  background: var(--bg-hover) !important;
+}
+
+.stage-unpublished {
+  background: #ffffff !important;
+  border-left: 4px solid var(--color-warning) !important; /* 6.39:1 PASS（#9c5b00） */
+}
+.stage-unpublished:hover {
+  background: var(--bg-hover) !important;
+}
+
+/* 选中高亮态：醒目高对比度墨蓝边 + 阴影，一秒知道点中哪一个 */
 .stageSelected {
-  background: #FFF5F5 !important;
-  border-color: #B22222 !important;
-  box-shadow: 0 2px 8px rgba(178, 34, 34, 0.12);
+  background: #ffffff !important;
+  border-color: var(--color-primary) !important;
+  border-left: 5px solid var(--color-primary) !important;
+  box-shadow: 0 0 0 1.5px var(--color-primary) inset,
+    0 6px 20px rgba(30, 58, 138, 0.12) !important;
+}
+
+.stageTags {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .stageHead {
@@ -162,13 +286,13 @@
 .stageName {
   font-size: 13px;
   font-weight: 600;
-  color: #1A1A1A;
+  color: var(--text-1);
 }
 
 .stageRow {
   display: flex;
   font-size: 11px;
-  color: #4E5969;
+  color: var(--text-2);
   margin-top: 3px;
   line-height: 1.4;
 }
@@ -176,12 +300,12 @@
 .stageLabel {
   width: 52px;
   flex-shrink: 0;
-  color: #86909C;
+  color: var(--text-3);
 }
 
 .announcementDesc {
   flex: 1;
-  color: #1A1A1A;
+  color: var(--text-1);
 }
 
 .noticeChips {
@@ -192,54 +316,78 @@
 
 .noticeChip {
   cursor: pointer;
+  transition: all 0.18s;
+}
+.noticeChip:hover {
+  background: #E8F3FF !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  transform: translateY(-1px);
 }
 
-/* 右侧小编工作台 */
+/* 右侧小编工作台：立体卡片 + 鲜明主色顶部压条 */
 .workbench {
-  border-top: 3px solid #B22222;
+  border-top: 4px solid #2563eb;
+  position: relative;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .wbTitle {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
-  color: #1A1A1A;
+  color: var(--text-1);
   display: flex;
   align-items: center;
   gap: 8px;
+  letter-spacing: 0.2px;
 }
 
 .wbSub {
-  font-size: 12px;
-  color: #7A7A7A;
-  margin: 4px 0 16px;
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 8px 0 18px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--bg-hover);
+  border-radius: 6px;
+  border: 1px solid var(--border-light);
 }
 
 .wbEmpty {
-  padding: 32px 0;
+  padding: 48px 0;
   text-align: center;
-  color: #86909C;
-  font-size: 13px;
+  color: var(--text-3);
+  font-size: 14px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid var(--border-base);
+  margin-top: 10px;
 }
 
 .wbField {
-  margin-bottom: 14px;
+  margin-bottom: 18px;
 }
 
 .wbLabel {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  color: #1A1A1A;
-  margin-bottom: 6px;
+  color: #1a202c;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .wbBtns {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .wbRow {
@@ -250,28 +398,31 @@
 }
 
 .wbHint {
-  font-size: 12px;
-  color: #7A7A7A;
+  font-size: 13px;
+  color: var(--text-2);
 }
 
 .wbPublish {
-  margin-top: 16px;
-  padding-top: 14px;
-  border-top: 1px dashed #E8E5E0;
+  margin-top: 20px;
+  background: var(--bg-hover);
+  padding: 16px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
 }
 
 .wbFootBtns {
   display: flex;
-  gap: 10px;
-  margin-top: 14px;
+  gap: 14px;
+  margin-top: 16px;
+  align-items: center;
 }
 
 .wbOthers {
   display: flex;
-  gap: 10px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 18px;
   padding-top: 14px;
-  border-top: 1px solid #E8E5E0;
+  border-top: 1px solid var(--border-light);
   flex-wrap: wrap;
 }
 
@@ -279,7 +430,71 @@
   font-family: inherit;
   font-size: 13px;
   padding: 5px 8px;
-  border: 1px solid #D4D0CA;
+  border: 1px solid var(--border-base);
   border-radius: 4px;
   margin-top: 6px;
+}
+
+/* ============================================================
+   右栏编辑器 · 视觉焦点高亮（1秒内看到重点）
+   ============================================================ */
+
+/* 正文编辑区：浅蓝底 + 粗边框，一眼识别为核心输入区 */
+.wbField :global(.t-textarea) {
+  background: var(--color-primary-light);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  transition: all 0.2s;
+}
+.wbField :global(.t-textarea:hover) {
+  border-color: var(--color-primary-hover);
+  box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.08);
+}
+.wbField :global(.t-textarea--focused),
+.wbField :global(.t-textarea:focus-within) {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.12);
+}
+
+/* 预览红头按钮：主色描边 + 浅蓝底，突出核心操作 */
+.wbPreviewBtn {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background: var(--color-primary-light) !important;
+  font-weight: var(--fw-semibold) !important;
+  transition: all 0.2s !important;
+}
+.wbPreviewBtn:hover {
+  background: var(--color-primary) !important;
+  color: var(--text-inverse) !important;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+/* 上传附件按钮：实线细边 + 柔和底色，识别为稳重操作区 */
+.wbUploadBtn {
+  border: 1px solid var(--border-base) !important;
+  background: var(--bg-hover) !important;
+  color: var(--text-1) !important;
+  font-weight: var(--fw-medium) !important;
+  transition: all 0.2s !important;
+}
+.wbUploadBtn:hover {
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background: var(--color-primary-light) !important;
+  transform: translateY(-1px);
+}
+
+/* 去配置提醒通道：主色文字 + 下划线 + 箭头动画，识别为跳转链接 */
+.wbConfigLink {
+  color: var(--color-primary) !important;
+  font-weight: var(--fw-semibold) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all 0.2s !important;
+}
+.wbConfigLink:hover {
+  color: var(--color-primary-hover) !important;
+  transform: translateX(3px);
 }

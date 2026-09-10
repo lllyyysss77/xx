@@ -9,42 +9,44 @@
   前端 API baseURL 用**同源相对路径**（`web/src/api/client.ts` 的 `API_BASE_URL` 默认空串），
   本地 `vite dev` 经 `vite.config.js` 的 `server.proxy` 把 `/admin`、`/auth`、`/files`、`/health` 代理到后端。
   ——彻底消除「前端写死 `http://127.0.0.1:3100` + 跨域」导致部署后所有接口/上传失败的根因。
-- 端口：从 `DEPLOY_RUN_PORT`（沙箱/部署）读取，回退 `PORT`、再回退 3100；监听 host 默认 `0.0.0.0`（可用 HOST 覆盖）。
-- 数据库连接：`DATABASE_URL` 环境变量（`.env`，**禁止入库真实密钥到 git**）。
-- `/`：web/dist 存在时返回后台首页（SPA history 路由由 setNotFoundHandler 回退 index.html，/admin//auth//files//health 不回退仍返回 JSON）；无 dist 时返回 API 服务信息 JSON。
+- 端口：从 `DEPLOY_RUN_PORT`（沙箱/部署）读取，回退 `PORT`、再回退 3100；监听 host 默认 `0.0.0.0`（可用 HOST 覆盖）；3100 被占自动平滑 +1 换端口。
+- 数据库连接：`DATABASE_URL` 环境变量（`backend/.env`，**禁止入库真实密钥到 git**）；pg Pool 带 keepAlive 心跳加固（防 Supabase/Neon 空闲连接 ECONNRESET）。
+- `/`：web/dist 存在时返回后台首页（SPA history 路由由 setNotFoundHandler 回退 index.html，/admin//auth//files//health//candidate//ws 不回退仍返回 JSON）；无 dist 时返回 API 服务信息 JSON。
+- 2026-09-10 起以 `server-minimal-package` 包为代码基地：目录改为 `backend/` + `web/` 双目录；新增 `routes/audit-logs.ts`（经办人履职留痕/在岗统计，`operation_audit_logs` 表）与 `/candidate/*`（参选人端点）；`JWT_SECRET`/`ALLOWED_ORIGINS`/`SUPABASE_*` 为预留环境变量。
 
 ## 常用命令（仅用 pnpm）
-- 安装依赖：`pnpm install`
-- 类型检查：`pnpm run check`（= `tsc --noEmit`）
-- 构建：`pnpm run build`（输出 `dist/`）
-- 开发：`pnpm run dev`
-- 建库/对齐 schema（幂等）：`pnpm run migrate`（执行 `schema.sql`，全部 `create/alter ... if not exists`）
-- 执行 migrations/ 增量迁移：`pnpm run migrate:file [文件名]`（不传参执行全部，带 `schema_migrations` 记录表）
-- 按甲方 DOCX 重建公告模板：`pnpm run seed:templates`
+- 安装依赖：`pnpm -C backend install && pnpm -C web install`
+- 类型检查：`pnpm -C backend run typecheck`（= `tsc --noEmit`）
+- 开发：`pnpm -C backend run dev`（后端）；`pnpm -C web run dev`（前端，3003，proxy 已配 /admin /auth /files /health /candidate）
+- web 构建：`pnpm -C web exec vite build --mode release`（输出 `web/dist`，由后端同源托管）
+- 建库/对齐 schema（幂等）：`pnpm -C backend run migrate`（执行 `schema.sql`，全部 `create/alter ... if not exists`）
+- 执行 migrations/ 增量迁移：`pnpm -C backend run migrate:file [文件名]`（不传参执行全部，带 `schema_migrations` 记录表）
+- 按甲方 DOCX 重建公告模板：`pnpm -C backend run seed:templates`
 
 ## 目录结构
 ```
-src/
-  server.ts          仅组装：注册 helmet/cors/multipart + 各路由插件 + /health + 错误处理
-  lib.ts             共享层：pool、auth/roleGuard/requirePerm、notify、日程(addDays/schedule)、saveUploadPart(统一落盘)
-  migrate.ts         执行 schema.sql
-  migrate-file.ts    执行 migrations/*.sql（带 schema_migrations 记录）
+backend/
+  server.ts          仅组装：helmet/cors(白名单)/multipart/static(托管../web/dist) + 13 路由插件 + /health + 错误兜底
+  lib.ts             共享层：pool(keepAlive)、auth/roleGuard/requirePerm、notify、日程、saveUploadPart
+  migrate.ts / migrate-file.ts    schema.sql 全量幂等 / migrations/*.sql 增量（schema_migrations 记录）
+  supabase-ca.crt    Supabase SSL CA（预留）
+  schema.sql         全量幂等建表（含 operation_audit_logs）
+  migrations/        增量幂等 SQL（含 20260908_fix_uuid_pk_defaults.sql：所有 uuid 主键补 gen_random_uuid() 默认值）
+  .env               DATABASE_URL（gitignore）
+  routes/            auth/accounts/roles/elections/proposals/materials/candidates/announcements/biz-files/files/notifications/audit-logs
+web/
+  src/api/           client.ts(同源 baseURL+拦截器) files/materials/positions/announcements/proposals/...
+  src/modules/       home/proposals/materials/positions/activities/candidates/archives/audit/...
+  src/components/    FileList(全量 files[] 预览)/GuideTip/CellText/IconActions...
+  vite.config.js     react 插件 + server.proxy(/admin /auth /files /health /candidate)
+miniprogram/         参选人小程序（/health.today 为在线模式时钟源）
+.coze                build: backend+web install+web 构建；run: cd backend && tsx 直跑 src/server.ts
+```
   routes/
-    auth.ts          登录（管理端 / 参选人入口）、组织、注册、改密
-    accounts.ts      超管秘密开号：选归属地→选角色→手机号+初始密码(123456)，后台不开放注册
-    roles.ts         角色 / 权限点
-    elections.ts     选举封地(fief)/日程实例/候选人口径/归档台账 /admin/archives
-    proposals.ts     换届提案：创建/编辑/审批；通过→单事务建封地+日程+岗位+公告
-    materials.ts     参选人报名材料 + 多附件
-    candidates.ts    候选人池 + R1~R4 四轮审核（材料完整/镇级初审/区级联审/党委考察）
-    announcements.ts 公告 + 模板 + 发布
-    files.ts         统一上传 /files/upload、匿名下载 /files/:key
-    biz-files.ts     提案/公告/岗位三类业务附件（各一张 *_files 强外键表）
-    notifications.ts webhook 订阅（企微/飞书/plain）
+  src/routes/         auth/accounts/roles/elections/proposals/materials/candidates/announcements/files/biz-files/notifications/audit-logs
 migrations/          增量幂等 SQL
 schema.sql           全量幂等建表 + 补列 alter（建库唯一依据）
 seed-templates.mjs   按甲方 DOCX 重建公告模板（含 at_sched_offset 自动排期）
-rebuild-db.mjs       仅本地/演练用：drop 全表重建 + seed（**严禁在生产执行**）
 ```
 
 ## 关键业务规则（字段/流程契约）

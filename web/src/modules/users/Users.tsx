@@ -20,6 +20,7 @@ import {
   createAccount,
   resetPassword,
   toggleAccountStatus,
+  createOrganization,
   Account,
 } from '../../api/accounts';
 import { getOrganizations, OrgItem } from '../../api/auth';
@@ -50,6 +51,13 @@ export default function UsersPage() {
   const [newRole, setNewRole] = useState('sub_admin');
   const [newOrgId, setNewOrgId] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  // 自增村居/社区归属地弹窗
+  const [orgModalVisible, setOrgModalVisible] = useState(false);
+  const [orgName, setOrgName] = useState('');
+  const [orgSlug, setOrgSlug] = useState('');
+  const [orgType, setOrgType] = useState<'village' | 'community'>('village');
+  const [orgSubmitting, setOrgSubmitting] = useState(false);
 
   const { user } = useAuthStore();
   const isPlatformAdmin = user?.role === 'platform_admin';
@@ -116,6 +124,39 @@ export default function UsersPage() {
     }
   };
 
+  // 提交自增村社归属地
+  const handleCreateOrg = async () => {
+    if (!orgName.trim() || !orgSlug.trim()) {
+      MessagePlugin.error('请填写村社名称及唯一代号标识（如 xiagao-cun）');
+      return;
+    }
+    if (!/^[a-z0-9-]+$/.test(orgSlug.trim())) {
+      MessagePlugin.error('代号标识仅允许小写字母、数字和中划线（如 chengdong-shequ）');
+      return;
+    }
+
+    setOrgSubmitting(true);
+    try {
+      const created = await createOrganization({
+        name: orgName.trim(),
+        slug: orgSlug.trim(),
+        orgType,
+      });
+      MessagePlugin.success(`村社归属地【${created.name}】创建成功！已联动可用于开号`);
+      setOrgModalVisible(false);
+      setOrgName('');
+      setOrgSlug('');
+      // 重新拉取并选中新村社
+      const orgData = await getOrganizations();
+      setOrgs(orgData);
+      setNewOrgId(created.id);
+    } catch (err: any) {
+      MessagePlugin.error(err.message || '新增村社归属地失败');
+    } finally {
+      setOrgSubmitting(false);
+    }
+  };
+
   // 重置初始密码 123456
   const handleResetPassword = async (account: Account) => {
     try {
@@ -171,22 +212,22 @@ export default function UsersPage() {
     {
       colKey: 'op',
       title: '管理操作',
-      width: 200,
+      width: 220,
       cell: ({ row }: any) => (
-        <Space>
+        <Space size={8}>
           <Popconfirm
             content={`确认将该账号密码重置为 123456 吗？`}
             onConfirm={() => handleResetPassword(row)}
           >
-            <Button theme="primary" variant="text" size="small" icon={<RefreshIcon />}>
+            <Button theme="primary" variant="outline" size="medium" icon={<RefreshIcon />}>
               重置密码
             </Button>
           </Popconfirm>
 
           <Button
             theme={row.status === 'active' ? 'danger' : 'success'}
-            variant="text"
-            size="small"
+            variant={row.status === 'active' ? 'outline' : 'base'}
+            size="medium"
             onClick={() => handleToggleStatus(row)}
           >
             {row.status === 'active' ? '停用' : '启用'}
@@ -204,14 +245,24 @@ export default function UsersPage() {
         actions={
           <Space>
             {isPlatformAdmin && (
-              <Select
-                style={{ width: 220 }}
-                value={selectedOrgId}
-                onChange={(v: any) => setSelectedOrgId(v)}
-                placeholder="按归属地筛选"
-                clearable
-                options={orgs.map((o) => ({ label: `${o.orgType === 'community' ? '🏘' : '🏡'} ${o.name}`, value: o.id }))}
-              />
+              <>
+                <Select
+                  style={{ width: 220 }}
+                  value={selectedOrgId}
+                  onChange={(v: any) => setSelectedOrgId(v)}
+                  placeholder="按归属地筛选"
+                  clearable
+                  options={orgs.map((o) => ({ label: `${o.orgType === 'community' ? '🏘' : '🏡'} ${o.name}`, value: o.id }))}
+                />
+                <Button
+                  theme="default"
+                  variant="outline"
+                  icon={<AddIcon />}
+                  onClick={() => setOrgModalVisible(true)}
+                >
+                  新增村社归属地
+                </Button>
+              </>
             )}
             <PermGate perm="account:create" roles={['platform_admin', 'sub_admin']}>
               <Button theme="primary" icon={<AddIcon />} onClick={openCreateModal}>
@@ -276,6 +327,49 @@ export default function UsersPage() {
           <Divider style={{ margin: '16px 0' }} />
           <div style={{ background: '#eef4ff', padding: '10px 14px', borderRadius: 4, color: '#0052d9', fontSize: 13, lineHeight: 1.6 }}>
             🔒 安全机制：新账号开通后默认登录密码统一设为 <strong>123456</strong>。工作人员首次登录后，可在工作台顶部自主修改密码。
+          </div>
+        </Form>
+      </Dialog>
+
+      {/* 超管自增村社归属地 Dialog */}
+      <Dialog
+        header="新建村居 / 社区归属地"
+        visible={orgModalVisible}
+        onClose={() => setOrgModalVisible(false)}
+        confirmBtn={{ content: '确认创建并启用', theme: 'primary', loading: orgSubmitting }}
+        onConfirm={handleCreateOrg}
+        width={480}
+      >
+        <Form labelWidth={120}>
+          <FormItem label="归属地类型" requiredMark>
+            <Select
+              value={orgType}
+              onChange={(v: any) => setOrgType(v)}
+              options={[
+                { label: '🏡 农村行政村 (village)', value: 'village' },
+                { label: '🏘 城市社区 (community)', value: 'community' },
+              ]}
+            />
+          </FormItem>
+
+          <FormItem label="村社中文名称" requiredMark>
+            <Input
+              value={orgName}
+              onChange={(v) => setOrgName(v)}
+              placeholder="例如：下高村、龙德井社区"
+            />
+          </FormItem>
+
+          <FormItem label="唯一标识代码" requiredMark>
+            <Input
+              value={orgSlug}
+              onChange={(v) => setOrgSlug(v)}
+              placeholder="例如：xiagao-cun、longdejing-shequ (小写英文字母与中划线)"
+            />
+          </FormItem>
+
+          <div style={{ background: '#fdf6ec', padding: '10px 14px', borderRadius: 4, color: '#e6a23c', fontSize: 12, lineHeight: 1.5, marginTop: 8 }}>
+            💡 规则提醒：唯一标识代码（Slug）一旦创建不可变更，将直接用于登录界面村社定位与一人一地组织隔离。
           </div>
         </Form>
       </Dialog>

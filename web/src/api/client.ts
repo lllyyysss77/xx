@@ -6,11 +6,32 @@
  */
 import axios, { AxiosError, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-// 同源优先：生产环境由后端 Fastify 同源托管 web/dist，请求走相对路径（无跨域、无端口硬编码）。
-// 本地 vite dev 时通过 vite.config.js 的 server.proxy 把 '/admin'、'/files'、'/auth' 等代理到后端。
-// 仅当显式配置 VITE_API_BASE_URL 时才跨域直连（预留）。
+// ============================================================
+// [TAG-INDEX] client.ts — 统一 API 请求客户端（axios 封装）
+// [ENV-CONFIG]  L9-22   getFallbackBaseUrl — baseURL 派生（VITE_API_BASE_URL 可配，3003 端口走相对路径代理）
+// [REUSABLE]    L30-42  toCamelCase — snake_case→camelCase 递归转换
+// [ROUTE-CORE]  L44-48  axios 实例（baseURL/timeout/withCredentials）
+// [AUTH]        L51-63  请求拦截器（token 注入 + FormData Content-Type 处理）
+// [BREAKPOINT]   L66-86  响应拦截器（snake→camel + 401 清除 token 跳转登录）
+// ============================================================
+// [ENV-CONFIG] baseURL 派生 — VITE_API_BASE_URL 优先；3003 端口走相对路径（Vite 代理）；生产同源
+const getFallbackBaseUrl = () => {
+  if (typeof window === 'undefined') return 'http://127.0.0.1:3100';
+  const { hostname, port } = window.location;
+  // 如果前端跑在 3003 端口，说明是本地 Vite 开发服务器，且 vite.config.js 已配置反向代理（/auth, /admin, /files 等）
+  // 直接走相对路径即可自动转发到后端 3100，同时免疫 IP 跨域、端口未监听 0.0.0.0 或局域网拦截
+  if (port === '3003') {
+    return '';
+  }
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return 'http://127.0.0.1:3100';
+  }
+  // 生产构建或静态托管环境：默认同源
+  return window.location.origin || 'http://127.0.0.1:3100';
+};
+
 export const API_BASE_URL =
-  ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined)?.replace(/\/+$/, '') || '';
+  (import.meta as any).env?.VITE_API_BASE_URL || getFallbackBaseUrl();
 
 /**
  * 递归将对象的 snake_case 键转为 camelCase
@@ -35,6 +56,7 @@ const request: AxiosInstance = axios.create({
   withCredentials: false,
 });
 
+// [AUTH] 请求拦截器 — 自动注入 Bearer token（cxq_token）；FormData 时删除 Content-Type 让浏览器自动带 multipart boundary
 // —— 请求拦截：自动注入 Token ——
 request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('cxq_token');
@@ -50,6 +72,7 @@ request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
+// [BREAKPOINT] 响应拦截器 — snake→camel 深度转换 + 401 清除 token 跳转登录（全局认证失效断点）
 // —— 响应拦截：统一转换 snake_case 并处理错误 ——
 request.interceptors.response.use(
   (resp) => {

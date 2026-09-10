@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   Card,
   Table,
@@ -25,6 +25,7 @@ import {
   BrowseIcon,
   CheckCircleIcon,
   CloseCircleIcon,
+  UploadIcon,
 } from 'tdesign-icons-react';
 import {
   getProposals,
@@ -32,11 +33,13 @@ import {
   updateProposal,
   reviewProposal,
   uploadProposalFile,
+  deleteProposalFile,
   Proposal,
   PositionInput,
 } from '../../api/proposals';
 import { uploadFile } from '../../api/files';
 import { useAuthStore } from '../../stores/useAuthStore';
+import { GuideTip } from '../../components/GuideTip';
 import { PermGate } from '../../components/PermGate';
 import { FileList } from '../../components/FileList';
 
@@ -82,6 +85,10 @@ export default memo(function ProposalsPage() {
   ]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [positionFiles, setPositionFiles] = useState<{ [index: number]: File }>({});
+  const posFileInputs = useRef<{ [index: number]: HTMLInputElement | null }>({});
+  const schemeFileInputRef = useRef<HTMLInputElement>(null);
+  const detailUploadInputRef = useRef<HTMLInputElement>(null);
+  const [detailUploading, setDetailUploading] = useState(false);
 
   const { user } = useAuthStore();
 
@@ -253,7 +260,11 @@ export default memo(function ProposalsPage() {
     try {
       await reviewProposal(currentProposal.id, reviewDecision, reviewNote.trim());
       if (reviewDecision === 'approved') {
-        MessagePlugin.success('🎉 提案审批通过！全套 14 阶段日程、各岗位及预排公文已由 Pipeline 自动生成！');
+        MessagePlugin.success('🎉 提案审批通过！全套法定阶段日程、岗位及预排公文已依规自动生成！');
+        // 审批通过后，引导用户前往活动列表查看
+        setTimeout(() => {
+          MessagePlugin.info('👉 提示：请前往「选举活动管理」进入当届活动，开始推进日程并编辑发布公告！', 6000);
+        }, 1200);
       } else {
         MessagePlugin.warning('提案已驳回，发起人可重新修改后提交');
       }
@@ -317,19 +328,30 @@ export default memo(function ProposalsPage() {
       width: 110,
       cell: ({ row }: any) => {
         const meta = STATUS_MAP[row.status as keyof typeof STATUS_MAP] || { label: row.status, theme: 'default' };
-        return <Tag theme={meta.theme} variant="light">{meta.label}</Tag>;
+        const tipContent = row.status === 'approved'
+          ? '提案已通过 ✅ 全套阶段日程、各岗位及公文模板已自动生成。去「选举活动管理」查看活动详情并推进各阶段工作。'
+          : row.status === 'pending'
+          ? '提案等待审批中。审批通过后系统将自动生成全套选举日程。'
+          : row.status === 'rejected'
+          ? '提案未通过，请根据驳回意见修改后重新提交。'
+          : '草稿状态，尚未提交审批。';
+        return (
+          <GuideTip content={tipContent} placement="top">
+            <Tag theme={meta.theme} variant="light">{meta.label}</Tag>
+          </GuideTip>
+        );
       },
     },
     {
       colKey: 'op',
       title: '操作',
-      width: 200,
+      width: 220,
       cell: ({ row }: any) => (
-        <Space>
+        <Space size={8}>
           <Button
             theme="default"
-            variant="text"
-            size="small"
+            variant="outline"
+            size="medium"
             onClick={() => {
               setCurrentProposal(row);
               setDetailVisible(true);
@@ -342,8 +364,8 @@ export default memo(function ProposalsPage() {
           {row.status === 'rejected' && (
             <Button
               theme="warning"
-              variant="text"
-              size="small"
+              variant="base"
+              size="medium"
               onClick={() => openCreateModal(row)}
             >
               重新编辑
@@ -355,8 +377,8 @@ export default memo(function ProposalsPage() {
             <PermGate perm="proposal:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
               <Button
                 theme="primary"
-                variant="text"
-                size="small"
+                variant="base"
+                size="medium"
                 onClick={() => {
                   setCurrentProposal(row);
                   setReviewDecision('approved');
@@ -405,9 +427,15 @@ export default memo(function ProposalsPage() {
           </Space>
 
           <PermGate perm="proposal:create" roles={['platform_admin', 'sub_admin', 'editor']}>
-            <Button theme="primary" icon={<AddIcon />} onClick={() => openCreateModal()}>
-              ＋ 创建提案
-            </Button>
+            <GuideTip
+              title="第一步：发起换届提案"
+              content="设定换届正式选举日 (D-day)、选举方式及各岗位职数方案，提交审批。审批通过后系统将全自动生成 16 阶段法定日程与预排公文！"
+              placement="left"
+            >
+              <Button theme="primary" icon={<AddIcon />} onClick={() => openCreateModal()}>
+                ＋ 创建提案
+              </Button>
+            </GuideTip>
           </PermGate>
         </div>
 
@@ -436,7 +464,7 @@ export default memo(function ProposalsPage() {
           <Form labelWidth={150}>
             <FormItem label="归属机构">
               <Input
-                value={`${user?.orgType === 'community' ? '🏘 城市社区居委会' : '🏡 农村村民委员会'} · ${user?.orgName || '演示单位'}`}
+                value={`${user?.orgType === 'community' ? '🏘 城市社区居委会' : '🏡 农村村民委员会'} · ${user?.orgName || '本单位'}`}
                 disabled
               />
             </FormItem>
@@ -458,7 +486,7 @@ export default memo(function ProposalsPage() {
                 style={{ width: '100%' }}
               />
               <div style={{ color: '#B22222', fontSize: 12, marginTop: 4 }}>
-                * 核心法定度量衡：提案审核通过后，全套 14 阶段公文、报名期限、联审日程均由此绝对日期依法倒排秒级生成。
+                * 核心法定度量衡：提案审核通过后，全套 16 阶段公文、报名期限、联审日程均由此绝对日期依法倒排秒级生成。
               </div>
             </FormItem>
 
@@ -522,8 +550,9 @@ export default memo(function ProposalsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 12, color: '#666', background: '#FFF', padding: '6px 12px', borderRadius: 4, border: '1px dashed #DCDCDC' }}>
                     <span>📎 岗位参选资格样表/问答附件：</span>
                     <input
+                      ref={(el) => (posFileInputs.current[idx] = el)}
                       type="file"
-                      style={{ fontSize: 12 }}
+                      style={{ display: 'none' }}
                       onChange={(e) => {
                         if (e.target.files?.[0]) {
                           const file = e.target.files[0];
@@ -532,6 +561,14 @@ export default memo(function ProposalsPage() {
                         }
                       }}
                     />
+                    <Button
+                      size="small"
+                      variant="outline"
+                      icon={<UploadIcon />}
+                      onClick={() => posFileInputs.current[idx]?.click()}
+                    >
+                      选择文件
+                    </Button>
                     {positionFiles[idx] ? (
                       <Tag theme="success" variant="light">已就绪：{positionFiles[idx].name}</Tag>
                     ) : (
@@ -548,11 +585,28 @@ export default memo(function ProposalsPage() {
             <Divider align="left">选举实施方案及红头盖章附件</Divider>
             <FormItem label="工作方案/样表附件">
               <input
+                ref={schemeFileInputRef}
                 type="file"
+                style={{ display: 'none' }}
                 onChange={(e) => {
                   if (e.target.files?.[0]) setSelectedFile(e.target.files[0]);
                 }}
               />
+              <Space align="center">
+                <Button
+                  size="small"
+                  variant="outline"
+                  icon={<UploadIcon />}
+                  onClick={() => schemeFileInputRef.current?.click()}
+                >
+                  选择文件
+                </Button>
+                {selectedFile ? (
+                  <Tag theme="success" variant="light">已选择：{selectedFile.name}</Tag>
+                ) : (
+                  <span style={{ color: '#999', fontSize: 12 }}>未选择文件（支持 PDF / Word / 扫描件）</span>
+                )}
+              </Space>
               <div style={{ color: '#7A7A7A', fontSize: 12, marginTop: 4 }}>
                 支持上传由上级或选委会盖章的工作筹备方案扫描件、空白报名表单模板等附件（通过后自动归档并供小程序端参选人下载）。
               </div>
@@ -640,8 +694,64 @@ export default memo(function ProposalsPage() {
               bordered
             />
 
-            <h4 style={{ margin: '16px 0 8px', color: '#1A1A1A' }}>方案红头附件</h4>
-            <FileList files={currentProposal.files || []} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0 8px' }}>
+              <h4 style={{ margin: 0, color: '#1A1A1A' }}>方案红头附件及盖章扫描件</h4>
+              {/* 允许有创建/编辑权限者直接在详情中补充上传公文方案扫描件 */}
+              <PermGate perm="proposal:create" roles={['platform_admin', 'sub_admin', 'editor']}>
+                <div>
+                  <input
+                    ref={detailUploadInputRef}
+                    type="file"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file || !currentProposal) return;
+                      setDetailUploading(true);
+                      try {
+                        await uploadProposalFile(currentProposal.id, file);
+                        MessagePlugin.success(`附件「${file.name}」补充上传成功`);
+                        // 刷新提案列表与当前详情视图
+                        const updatedList = await getProposals();
+                        setList(updatedList);
+                        const refreshed = updatedList.find(item => item.id === currentProposal.id);
+                        if (refreshed) setCurrentProposal(refreshed);
+                      } catch (err: any) {
+                        MessagePlugin.error(err.message || '上传附件失败');
+                      } finally {
+                        setDetailUploading(false);
+                        if (detailUploadInputRef.current) detailUploadInputRef.current.value = '';
+                      }
+                    }}
+                  />
+                  <Button
+                    size="small"
+                    variant="outline"
+                    theme="primary"
+                    icon={<UploadIcon />}
+                    loading={detailUploading}
+                    onClick={() => detailUploadInputRef.current?.click()}
+                  >
+                    补充上传附件
+                  </Button>
+                </div>
+              </PermGate>
+            </div>
+            <FileList
+              files={currentProposal.files || []}
+              onDelete={async (file) => {
+                if (!currentProposal) return;
+                try {
+                  await deleteProposalFile(currentProposal.id, file.id);
+                  MessagePlugin.success(`已移除附件「${file.fileName}」`);
+                  const updatedList = await getProposals();
+                  setList(updatedList);
+                  const refreshed = updatedList.find(item => item.id === currentProposal.id);
+                  if (refreshed) setCurrentProposal(refreshed);
+                } catch (err: any) {
+                  MessagePlugin.error(err.message || '删除附件失败');
+                }
+              }}
+            />
           </div>
         )}
       </Dialog>
@@ -687,7 +797,7 @@ export default memo(function ProposalsPage() {
 
           {reviewDecision === 'approved' && (
             <div style={{ padding: '10px 14px', background: '#E8F5ED', borderRadius: 6, fontSize: 12, color: '#2D8B55' }}>
-              💡 <strong>法律引擎联动说明</strong>：审查通过后，系统将在数据库单事务内自动生成当届封地活动、14 阶段法定日程倒排、各岗位及 16 篇预排法定公文草稿。
+              💡 <strong>法律引擎联动说明</strong>：审查通过后，系统将在数据库单事务内自动生成当届封地活动、16 阶段法定日程倒排、各岗位及 16 篇预排法定公文草稿。
             </div>
           )}
         </Form>

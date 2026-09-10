@@ -60,7 +60,7 @@ export default function HomePage() {
     return Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
   }, [currentFief]);
 
-  // 法定 14 阶段状态动态推导（按今日日期驱动，拒绝恒 0%）
+  // 法定 16 阶段状态动态推导（按今日日期驱动，拒绝恒 0%）
   const derivedStages = useMemo(() => {
     const todayStr = new Date().toISOString().slice(0, 10);
     return stages.map((s) => {
@@ -146,7 +146,7 @@ export default function HomePage() {
           }
           className={Style.colMain}
           actions={
-            <Button variant="text" size="small" onClick={() => navigate('/election/announcements')}>
+            <Button theme="primary" variant="text" size="medium" onClick={() => navigate('/election/announcements')}>
               查看全部 →
             </Button>
           }
@@ -154,7 +154,19 @@ export default function HomePage() {
           {publishedAnnouncements.length > 0 ? (
             <div className={Style.annList}>
               {publishedAnnouncements.map((item) => (
-                <div key={item.id} className={Style.annRow} onClick={() => navigate('/election/announcements')}>
+                <div
+                  key={item.id}
+                  className={Style.annRow}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => navigate('/election/announcements')}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate('/election/announcements');
+                    }
+                  }}
+                >
                   <Tag theme="default" variant="outline" size="small" className={Style.annPin}>
                     公告
                   </Tag>
@@ -179,11 +191,12 @@ export default function HomePage() {
           actions={
             currentFief && (
               <Button
+                theme="primary"
                 variant="text"
-                size="small"
+                size="medium"
                 onClick={() => navigate(`/election/activity/${currentFief.id}`)}
               >
-                14阶段全景 →
+                16 阶段全景 →
               </Button>
             )
           }

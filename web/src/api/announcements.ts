@@ -50,37 +50,37 @@ export const getAnnouncementTemplates = (params?: {
 }): Promise<AnnouncementTemplate[]> =>
   request.get('/admin/announcement-templates', { params });
 
-// 公告列表
+// 公告列表（全量返回，不分页：业务侧公告总数≤21，翻页无意义）
 export const getAnnouncements = (params?: {
   electionFiefId?: string;
   status?: string;
 }): Promise<Announcement[]> =>
-  request.get('/admin/announcements', { params }).then((res: any) => {
-    if (!Array.isArray(res)) return [];
-    return res.map((r: any) => ({
+  request.get('/admin/announcements', { params: { ...params, limit: 200 } }).then((res: any) => {
+    const rows = Array.isArray(res) ? res : (res?.items ?? []);
+    return rows.map((r: any) => ({
       id: r.id,
-      electionFiefId: r.electionFiefId,
-      fiefName: r.fiefName || '',
-      templateId: r.templateId,
-      templateName: r.templateName || '',
-      templateCode: r.templateCode || '',
-      stageKey: r.stageKey || '',
+      electionFiefId: r.electionFiefId || r.election_fief_id,
+      fiefName: r.fiefName || r.fief_name || '',
+      templateId: r.templateId || r.template_id,
+      templateName: r.templateName || r.template_name || '',
+      templateCode: r.templateCode || r.template_code || '',
+      stageKey: r.stageKey || r.stage_key || '',
       title: r.title || '',
       body: r.body || '',
       status: r.status || 'draft',
-      annSign: r.annSign,
-      annSignDate: r.annSignDate,
-      annOpenMaterialSubmit: r.annOpenMaterialSubmit ?? false,
-      annPublishMode: r.annPublishMode || 'immediate',
-      annPublishAt: r.annPublishAt,
-      annRemindHours: r.annRemindHours ?? 0,
-      annRemindTo: r.annRemindTo || '',
-      createdBy: r.createdBy,
-      updatedBy: r.updatedBy,
-      publishedBy: r.publishedBy,
-      publishedAt: r.publishedAt,
-      createdAt: r.createdAt,
-      updatedAt: r.updatedAt,
+      annSign: r.annSign || r.ann_sign,
+      annSignDate: r.annSignDate || r.ann_sign_date,
+      annOpenMaterialSubmit: r.annOpenMaterialSubmit ?? r.ann_open_material_submit ?? false,
+      annPublishMode: r.annPublishMode || r.ann_publish_mode || 'immediate',
+      annPublishAt: r.annPublishAt || r.ann_publish_at,
+      annRemindHours: r.annRemindHours ?? r.ann_remind_hours ?? 0,
+      annRemindTo: r.annRemindTo || r.ann_remind_to || '',
+      createdBy: r.createdBy || r.created_by,
+      updatedBy: r.updatedBy || r.updated_by,
+      publishedBy: r.publishedBy || r.published_by,
+      publishedAt: r.publishedAt || r.published_at,
+      createdAt: r.createdAt || r.created_at,
+      updatedAt: r.updatedAt || r.updated_at,
       files: r.files || [],
     }));
   });
@@ -89,12 +89,45 @@ export const getAnnouncements = (params?: {
 export const getAnnouncement = (id: string): Promise<Announcement> =>
   request.get(`/admin/announcements/${id}`);
 
-// 保存公告 (新建/编辑)
+// 保存公告：页面模型使用 ann* 字段，后端白名单使用业务短名；在唯一 API 出口转换，避免组件重复适配。
+type AnnouncementWritePayload = {
+  title?: string;
+  body?: string;
+  sign?: string;
+  signDate?: string;
+  openMaterialSubmit?: boolean;
+  publishMode?: 'immediate' | 'scheduled';
+  publishAt?: string | null;
+  remindHours?: number;
+  remindTo?: string;
+};
+
+const toAnnouncementWritePayload = (payload: Partial<Announcement>): AnnouncementWritePayload => ({
+  title: payload.title,
+  body: payload.body,
+  sign: payload.annSign,
+  signDate: payload.annSignDate,
+  openMaterialSubmit: payload.annOpenMaterialSubmit,
+  publishMode: payload.annPublishMode,
+  publishAt: payload.annPublishAt === undefined ? undefined : payload.annPublishAt || null,
+  remindHours: payload.annRemindHours,
+  remindTo: payload.annRemindTo,
+});
+
 export const saveAnnouncement = (
   id: string | null,
   payload: Partial<Announcement>,
-): Promise<Announcement> =>
-  id ? request.patch(`/admin/announcements/${id}`, payload) : request.post('/admin/announcements', payload);
+): Promise<Announcement> => {
+  if (!id) {
+    return request.post('/admin/announcements', {
+      electionFiefId: payload.electionFiefId,
+      title: payload.title,
+      body: payload.body,
+      templateCode: payload.templateCode,
+    });
+  }
+  return request.patch(`/admin/announcements/${id}`, toAnnouncementWritePayload(payload));
+};
 
 // 发布公告
 export const publishAnnouncement = (id: string): Promise<void> =>
@@ -104,8 +137,9 @@ export const publishAnnouncement = (id: string): Promise<void> =>
 export const uploadAnnouncementFile = (id: string, file: File): Promise<MaterialFile> => {
   const fd = new FormData();
   fd.append('file', file);
-  // 不手动设 Content-Type：浏览器需自动携带 multipart boundary（client 拦截器已处理）
-  return request.post(`/admin/announcements/${id}/file`, fd);
+  return request.post(`/admin/announcements/${id}/file`, fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
 // 删除公告附件

@@ -40,11 +40,62 @@ export interface Organization {
   id: string;
   slug: string;
   name: string;
+  orgType?: 'village' | 'community';
   status: string;
   createdAt: string;
 }
 export const getOrganizations = (): Promise<Organization[]> =>
   request.get('/admin/organizations');
+
+// 新增归属地（村子/社区）
+export const createOrganization = (payload: {
+  name: string;
+  slug: string;
+  orgType: 'village' | 'community';
+}): Promise<Organization> => request.post('/admin/organizations', payload);
+
+// 经办人履职留痕证据链接口
+export interface AuditLogItem {
+  id: string;
+  organizationId?: string;
+  organizationName?: string;
+  electionFiefId?: string;
+  userId: string;
+  userName: string;
+  phone: string;
+  role: string;
+  actionType: string;
+  actionTitle: string;
+  details?: Record<string, any>;
+  clientIp?: string;
+  createdAt: string;
+}
+
+export interface AuditLogStatsItem {
+  userId: string;
+  userName: string;
+  phone: string;
+  role: string;
+  organizationName: string;
+  activeDays: number;
+  totalActions: number;
+  firstActiveAt: string;
+  lastActiveAt: string;
+}
+
+export const getAuditLogs = (params?: {
+  organizationId?: string;
+  userId?: string;
+  actionType?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<AuditLogItem[] | { items: AuditLogItem[]; total: number; page: number; pageSize: number }> =>
+  request.get('/admin/audit-logs', { params });
+
+export const getAuditLogStats = (params?: { organizationId?: string }): Promise<AuditLogStatsItem[]> =>
+  request.get('/admin/audit-logs/stats', { params });
 
 // 批量预设账号（解锁码校验，超管/子管理可用）
 export interface PresetAccountInput {

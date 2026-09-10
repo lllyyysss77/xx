@@ -1,7 +1,6 @@
 import React from 'react';
 import { Button, Table, Tag } from 'tdesign-react';
 import type { PrimaryTableCol } from 'tdesign-react';
-import { BrowseIcon } from 'tdesign-icons-react';
 import { ElectionFief } from '../../api/elections';
 import Style from './index.module.less';
 
@@ -28,37 +27,52 @@ export const ElectionSessionList: React.FC<ElectionSessionListProps> = ({
   enterText = '查看本届',
   extra,
 }) => {
+  // 列宽设计（980 基准，主体区 ~730px 可用）：
+  // 1) 所有列一律用 width，绝不用 minWidth —— TDesign 在 table-layout:fixed 下会把
+  //    富余宽度整块塞给 minWidth 列，名称列因此涨到 280px 装 7 个字；改 width 后
+  //    浏览器按比例放大各列，宽度分布才均匀。
+  // 2) 表头一律 ≤4 字防换行；操作列按最长按钮文案实算，杜绝溢出截断
   const columns: PrimaryTableCol<ElectionFief>[] = [
     {
       colKey: 'name',
-      title: '换届活动全称（封地）',
-      minWidth: 240,
+      title: '活动名称',
+      width: 200,
       cell: ({ row }) => (
-        <div>
+        // 主行活动名 + 副行届次·单位：富余宽度被真实信息填掉，不再假空白
+        <div style={{ lineHeight: 1.4 }}>
           <div style={{ fontWeight: 500, color: '#1d2129' }}>{row.name}</div>
+          {(row.termName || row.unitName) && (
+            <div style={{ fontSize: 12, color: 'var(--text-3, #86909c)', marginTop: 2 }}>
+              {[row.termName, row.unitName].filter(Boolean).join(' · ')}
+            </div>
+          )}
         </div>
       ),
     },
     {
       colKey: 'dDay',
-      title: '正式选举日 (D-day)',
-      width: 160,
-      cell: ({ row }) => <span style={{ color: '#0052d9', fontWeight: 500 }}>{row.dDay || '—'}</span>,
+      title: '选举日',
+      width: 120,
+      cell: ({ row }) => (
+        <span style={{ color: 'var(--color-primary)', fontWeight: 500, whiteSpace: 'nowrap' }}>
+          {row.dDay || '—'}
+        </span>
+      ),
     },
     ...(statLabel
       ? [
           {
             colKey: '__stat',
             title: statLabel,
-            width: 130,
+            width: 128,
             cell: ({ row }: { row: ElectionFief }) => (statOf ? statOf(row) : '—'),
           } as PrimaryTableCol<ElectionFief>,
         ]
       : []),
     {
       colKey: 'status',
-      title: '活动状态',
-      width: 110,
+      title: '状态',
+      width: 88,
       cell: ({ row }) => {
         const isAct = row.status === 'active';
         const isClosed = row.status === 'closed';
@@ -75,14 +89,13 @@ export const ElectionSessionList: React.FC<ElectionSessionListProps> = ({
     {
       colKey: 'op',
       title: '操作',
-      width: 140,
-      fixed: 'right',
+      width: 170,
       cell: ({ row }) => (
         <Button
           variant="base"
           theme="primary"
-          size="small"
-          icon={<BrowseIcon />}
+          size="medium"
+          style={{ padding: '0 20px', height: '36px', fontWeight: 600 }}
           onClick={() => onEnter(row)}
         >
           {enterText}
@@ -107,7 +120,6 @@ export const ElectionSessionList: React.FC<ElectionSessionListProps> = ({
           data={data}
           loading={loading}
           bordered
-          stripe
           hover
           empty="暂无换届活动数据，请先由提案审批生成活动"
         />

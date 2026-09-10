@@ -24,7 +24,7 @@ export const SessionDetailBar: React.FC<Props> = ({ fief, onBack, extra }) => {
       </Button>
       <div className={Style.detailTitle}>
         <strong>{fief.termName || sessionNo(fief.name)}</strong>
-        <span className={Style.detailName}>（{fief.name} · {fief.organizationName || '当前辖区'}）</span>
+        <span className={Style.detailName}>（{fief.name}）</span>
       </div>
       <Tag size="small" theme="primary" variant="light">
         选举日：{fief.dDay || '—'}

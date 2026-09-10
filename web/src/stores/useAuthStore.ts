@@ -18,6 +18,13 @@ interface AuthState {
   clear: () => void;
 }
 
+// ============================================================
+// [TAG-INDEX] useAuthStore.ts — 认证状态管理（zustand）
+// [AUTH]  L21    useAuthStore — 全局认证状态（token/user/org/permissions）
+// [AUTH]  L48-49 login 成功后持久化（cxq_token + cxq_user 到 localStorage）
+// [AUTH]  L75-76 logout 清除持久化（token + user）
+// [BREAKPOINT] 登录成功后合并后端返回的 permissions 到 user 对象（前端权限闸 PermGate 的数据源）
+// ============================================================
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -45,6 +52,7 @@ export const useAuthStore = create<AuthState>()(
         };
 
         set({ token: resp.token, user: mergedUser, permissions: realPerms });
+        // [AUTH] 登录成功持久化 — token + user 写入 localStorage（client.ts 请求拦截器从此处取 token）
         localStorage.setItem('cxq_token', resp.token);
         localStorage.setItem('cxq_user', JSON.stringify(mergedUser));
       },
@@ -72,6 +80,7 @@ export const useAuthStore = create<AuthState>()(
 
       clear: () => {
         set({ token: null, user: null, permissions: [] });
+        // [AUTH] 登出清除 — token + user 从 localStorage 删除（与 client.ts 401 处理保持一致）
         localStorage.removeItem('cxq_token');
         localStorage.removeItem('cxq_user');
       },

@@ -29,12 +29,14 @@ import {
 import {
   getCandidates,
   addCandidateReview,
+  exportCandidateDossier,
   Candidate,
   CandidateReview,
 } from '../../api/candidates';
 import { getElectionFiefs, ElectionFief } from '../../api/elections';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useElectionStore } from '../../stores/useElectionStore';
+import { GuideTip } from '../../components/GuideTip';
 import { PermGate } from '../../components/PermGate';
 import { getFileUrl, formatFileSize } from '../../api/files';
 import { ElectionSessionList } from '../../components/ElectionSessionList';
@@ -89,9 +91,13 @@ export default memo(function CandidatesPage() {
     setLoading(true);
     try {
       const fiefData = await getElectionFiefs();
-      setFiefs(fiefData);
+      // 本页活动列表按创建时间倒序：最新创建的排最前（后端默认按 d_day 降序返回）
+      const sortedFiefs = [...fiefData].sort((a, b) =>
+        String(b.createdAt || '').localeCompare(String(a.createdAt || '')),
+      );
+      setFiefs(sortedFiefs);
 
-      const targetFiefId = selectedFiefId || currentFiefId || (fiefData[0]?.id ?? '');
+      const targetFiefId = selectedFiefId || currentFiefId || (sortedFiefs[0]?.id ?? '');
       if (targetFiefId) {
         setSelectedFiefId(targetFiefId);
         const data = await getCandidates({ electionFiefId: targetFiefId });
@@ -154,6 +160,24 @@ export default memo(function CandidatesPage() {
     return 0;
   };
 
+  // 导出候选人资格审查全卷 JSON/档案
+  const handleExportDossier = async (c: Candidate) => {
+    try {
+      MessagePlugin.loading('正在提取全卷数据并生成归档...');
+      const data = await exportCandidateDossier(c.id);
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `【候选人全卷】${c.candidateName || '候选人'}_${c.id.slice(0, 8)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      MessagePlugin.success('全卷档案导出成功！');
+    } catch (err: any) {
+      MessagePlugin.error(err.message || '全卷导出失败');
+    }
+  };
+
   // 客户端筛选
   const filteredList = useMemo(() => {
     return list.filter((c) => {
@@ -195,24 +219,35 @@ export default memo(function CandidatesPage() {
       width: 260,
       cell: ({ row }: any) => {
         const reviews = row.reviews || [];
-        const rounds = ['R1', 'R2', 'R3', 'R4'];
+        const rounds = [
+          { key: 'R1', name: '材料初审', desc: '村级工作人员核验报名材料完整性' },
+          { key: 'R2', name: '镇街初审', desc: '乡镇/街道一级资格初步审核' },
+          { key: 'R3', name: '区级联审', desc: '区级11部门多部门联合资格审查' },
+          { key: 'R4', name: '党委考察', desc: '党工委/党委考察确定正式候选人' },
+        ];
         return (
           <Space size="small">
             {rounds.map((r) => {
-              const rev = reviews.find((x: any) => x.round === r);
+              const rev = reviews.find((x: any) => x.round === r.key);
               const isPass = rev?.decision === 'approved';
               const isFail = rev?.decision === 'rejected';
-              const isCurrent = row.currentRound === r && row.status === 'reviewing';
+              const isCurrent = row.currentRound === r.key && row.status === 'reviewing';
 
               return (
-                <Tag
-                  key={r}
-                  size="small"
-                  theme={isPass ? 'success' : isFail ? 'danger' : isCurrent ? 'warning' : 'default'}
-                  variant={isPass || isFail || isCurrent ? 'light' : 'outline'}
+                <GuideTip
+                  key={r.key}
+                  title={`${r.key} · ${r.name}`}
+                  content={r.desc}
+                  placement="top"
                 >
-                  {r}:{isPass ? '过' : isFail ? '否' : isCurrent ? '审' : '待'}
-                </Tag>
+                  <Tag
+                    size="small"
+                    theme={isPass ? 'success' : isFail ? 'danger' : isCurrent ? 'warning' : 'default'}
+                    variant={isPass || isFail || isCurrent ? 'light' : 'outline'}
+                  >
+                    {r.key}:{isPass ? '过' : isFail ? '否' : isCurrent ? '审' : '待'}
+                  </Tag>
+                </GuideTip>
               );
             })}
           </Space>
@@ -240,13 +275,13 @@ export default memo(function CandidatesPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 200,
+      width: 230,
       cell: ({ row }: any) => (
-        <Space>
+        <Space size={8}>
           <Button
             theme="default"
-            variant="text"
-            size="small"
+            variant="outline"
+            size="medium"
             onClick={() => {
               setCurrentCandidate(row);
               setDetailVisible(true);
@@ -259,8 +294,8 @@ export default memo(function CandidatesPage() {
             <PermGate perm="candidate:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
               <Button
                 theme="primary"
-                variant="text"
-                size="small"
+                variant="base"
+                size="medium"
                 onClick={() => openReviewModal(row)}
               >
                 回填联审结果
@@ -381,6 +416,16 @@ export default memo(function CandidatesPage() {
         onClose={() => setDetailVisible(false)}
         footer={
           <Space>
+            {currentCandidate && (
+              <Button
+                theme="default"
+                variant="outline"
+                icon={<DownloadIcon />}
+                onClick={() => handleExportDossier(currentCandidate)}
+              >
+                导出全卷归档
+              </Button>
+            )}
             {currentCandidate?.status === 'reviewing' && (
               <PermGate perm="candidate:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
                 <Button

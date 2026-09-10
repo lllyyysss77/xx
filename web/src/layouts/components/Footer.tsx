@@ -11,8 +11,8 @@ const Footer = () => {
   }
 
   return (
-    <TFooter>
-      <Row justify="center">城厢区村居换届选举系统 · 内部政务工作台 © {new Date().getFullYear()}</Row>
+    <TFooter style={{ backgroundColor: '#1a1f36', color: 'rgba(255, 255, 255, 0.55)', padding: '16px 0', fontSize: '12px', letterSpacing: '1px' }}>
+      <Row justify="center">换届选举系统 v1 © {new Date().getFullYear()}</Row>
     </TFooter>
   );
 };

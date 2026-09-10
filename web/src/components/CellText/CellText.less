@@ -1,0 +1,47 @@
+/* 表格单元格文本：正文 + 副信息小字 + 查看更多 */
+
+.cell-text {
+  min-width: 0;
+}
+
+.cell-text__main {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.55;
+  font-size: 13.5px;
+  color: var(--text-1, #1a1d24);
+}
+
+/* 副信息：小一号、降灰、等宽数字 */
+.cell-text__sub {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-3, #8a909c);
+  font-variant-numeric: tabular-nums;
+}
+
+.cell-text__more {
+  display: inline-block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--color-primary, #1e3a8a);
+  cursor: pointer;
+  user-select: none;
+}
+.cell-text__more:hover {
+  text-decoration: underline;
+}
+
+.cell-text__full {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-1, #1a1d24);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 56vh;
+  overflow: auto;
+}

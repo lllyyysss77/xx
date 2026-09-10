@@ -69,8 +69,12 @@ export const getCandidates = (params?: {
 // 详情
 export const getCandidate = (id: string): Promise<Candidate> => request.get(`/admin/candidates/${id}`);
 
+// 候选人全卷导出（聚合申报材料、四轮联审记录、附件清单与法定审核窗口）
+export const exportCandidateDossier = (id: string): Promise<any> => request.get(`/admin/candidates/${id}/export`);
+
 // 录入一轮联审结果
 export const addCandidateReview = (
   candidateId: string,
   payload: { round: 'R1' | 'R2' | 'R3' | 'R4'; decision: 'approved' | 'rejected'; note?: string },
 ): Promise<CandidateReview> => request.post(`/admin/candidates/${candidateId}/reviews`, payload);
+

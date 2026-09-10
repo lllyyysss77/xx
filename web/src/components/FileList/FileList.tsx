@@ -10,7 +10,7 @@
  */
 import React from 'react';
 import { Space, Tag } from 'tdesign-react';
-import { BrowseIcon, DownloadIcon, FileIcon } from 'tdesign-icons-react';
+import { BrowseIcon, DownloadIcon, FileIcon, DeleteIcon } from 'tdesign-icons-react';
 import { getFileUrl, formatFileSize } from '../../api/files';
 
 export interface FileItem {
@@ -24,6 +24,7 @@ export interface FileItem {
 
 interface FileListProps {
   files: FileItem[];
+  onDelete?: (file: FileItem) => void;
 }
 
 const IMAGE_MIMES = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
@@ -34,7 +35,7 @@ const VALID_KEY_RE = /^[a-f0-9]{32}(\.[a-zA-Z0-9]{1,10})?$/;
 
 const isInvalidKey = (storageKey: string): boolean => !storageKey || !VALID_KEY_RE.test(storageKey);
 
-export const FileList: React.FC<FileListProps> = ({ files }) => {
+export const FileList: React.FC<FileListProps> = ({ files, onDelete }) => {
   if (!files?.length) return <span style={{ color: '#999' }}>无附件</span>;
 
   const handleDownload = (file: FileItem) => {
@@ -111,6 +112,13 @@ export const FileList: React.FC<FileListProps> = ({ files }) => {
                     style={{ cursor: 'pointer', color: '#0052d9' }}
                     onClick={() => handleDownload(f)}
                   />
+                  {onDelete && (
+                    <DeleteIcon
+                      size="16px"
+                      style={{ cursor: 'pointer', color: '#e34d59' }}
+                      onClick={() => onDelete(f)}
+                    />
+                  )}
                 </>
               )}
             </Space>

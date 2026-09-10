@@ -62,65 +62,53 @@ export default function TemplatesPage() {
   const columns = [
     {
       colKey: 'atCode',
-      title: '公文编码',
-      width: 120,
-      cell: ({ row }: any) => <strong style={{ color: '#0052d9' }}>{row.atCode}</strong>,
+      title: '文号',
+      width: 92,
+      cell: ({ row }: any) => <strong style={{ color: '#0052d9', whiteSpace: 'nowrap' }}>{row.atCode}</strong>,
     },
     {
       colKey: 'atName',
       title: '法定公文名称',
-      width: 320,
+      // 不设固定宽度：自动占满剩余空间，从根上消除横向滚动；长标题自然换行
       cell: ({ row }: any) => (
-        <span style={{ fontWeight: 500, color: '#1d2129' }}>{row.atName}</span>
+        <span style={{ fontWeight: 500, color: '#1d2129', lineHeight: 1.5 }}>{row.atName}</span>
       ),
     },
     {
       colKey: 'atVersion',
-      title: '适用法案版本',
-      width: 150,
-      cell: ({ row }: any) => (
-        <Tag theme={activeTab === 'community' ? 'warning' : 'primary'} variant="light">
-          {activeTab === 'community' ? '居委会组织法版' : '村民委员会组织法版'}
-        </Tag>
-      ),
-    },
-    {
-      colKey: 'atNeedRemind',
-      title: '到期提醒机制',
-      width: 140,
-      cell: ({ row }: any) => (
-        <Tag theme={row.atNeedRemind ? 'warning' : 'default'} variant="light">
-          {row.atNeedRemind ? '⏰ 提前24小时' : '无特殊提醒'}
-        </Tag>
+      title: '版本',
+      width: 88,
+      cell: () => (
+        <Tag size="small" theme="default" variant="light">2026版</Tag>
       ),
     },
     {
       colKey: 'op',
       title: '操作',
-      width: 200,
+      width: 88,
       cell: ({ row }: any) => (
-        <Space>
+        <Space size={2}>
           <Button
-            theme="default"
+            theme="primary"
             variant="text"
+            shape="square"
             size="small"
             icon={<BrowseIcon />}
+            title="查看全文红头排版预览"
             onClick={() => {
               setCurrentTpl(row);
               setPreviewVisible(true);
             }}
-          >
-            全文预览
-          </Button>
+          />
           <Button
-            theme="primary"
+            theme="default"
             variant="text"
+            shape="square"
             size="small"
             icon={<FileCopyIcon />}
+            title="一键复制模板正文"
             onClick={() => handleCopy(row.atContent)}
-          >
-            一键复制
-          </Button>
+          />
         </Space>
       ),
     },
@@ -190,7 +178,7 @@ export default function TemplatesPage() {
               annSign: activeTab === 'community' ? '{{某某社区}}居民选举委员会' : '{{某某村}}村民选举委员会',
               annSignDate: '{{成文日期}}',
             }}
-            orgName={user?.orgName || '演示单位'}
+            orgName={user?.orgName || '本单位'}
             orgType={activeTab}
           />
         )}

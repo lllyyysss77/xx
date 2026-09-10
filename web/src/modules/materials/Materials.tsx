@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import {
   Card,
   Table,
@@ -23,6 +23,7 @@ import {
   CloseCircleIcon,
   UserIcon,
   FolderIcon,
+  UploadIcon,
 } from 'tdesign-icons-react';
 import {
   getMaterials,
@@ -35,6 +36,7 @@ import { getPositions, Position } from '../../api/positions';
 import { getElectionFiefs, ElectionFief } from '../../api/elections';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useElectionStore } from '../../stores/useElectionStore';
+import { GuideTip } from '../../components/GuideTip';
 import { PermGate } from '../../components/PermGate';
 import { FileList } from '../../components/FileList';
 import { getFileUrl, formatFileSize } from '../../api/files';
@@ -76,6 +78,8 @@ export default memo(function MaterialsPage() {
   const [recPosition, setRecPosition] = useState('');
   const [recNote, setRecNote] = useState('');
   const [recFiles, setRecFiles] = useState<File[]>([]);
+  const recFileInputRef = useRef<HTMLInputElement>(null);
+  const suppFileInputRef = useRef<HTMLInputElement>(null);
 
   // 审核批复弹窗
   const [reviewVisible, setReviewVisible] = useState(false);
@@ -92,10 +96,14 @@ export default memo(function MaterialsPage() {
         getElectionFiefs(),
         getMaterials(),
       ]);
-      setFiefs(fiefData);
+      // 本页活动列表按创建时间倒序：最新创建的排最前（后端默认按 d_day 降序返回）
+      const sortedFiefs = [...fiefData].sort((a, b) =>
+        String(b.createdAt || '').localeCompare(String(a.createdAt || '')),
+      );
+      setFiefs(sortedFiefs);
       setList(matData);
 
-      const targetFiefId = selectedFiefId || currentFiefId || (fiefData[0]?.id ?? '');
+      const targetFiefId = selectedFiefId || currentFiefId || (sortedFiefs[0]?.id ?? '');
       if (targetFiefId) {
         setSelectedFiefId(targetFiefId);
         const posData = await getPositions({ electionFiefId: targetFiefId });
@@ -271,19 +279,28 @@ export default memo(function MaterialsPage() {
       width: 120,
       cell: ({ row }: any) => {
         const meta = STATUS_META[row.status as keyof typeof STATUS_META] || { label: row.status, theme: 'default' };
-        return <Tag theme={meta.theme} variant="light">{meta.label}</Tag>;
+        const tipContent = row.status === 'approved'
+          ? '材料初审已通过 ✅ 此人已自动进入候选人联审池，可在「候选人管理」中查看四轮审查进度。'
+          : row.status === 'submitted'
+          ? '材料已提交，等待村级工作人员初审。'
+          : '草稿状态，尚未提交审核。';
+        return (
+          <GuideTip content={tipContent} placement="top">
+            <Tag theme={meta.theme} variant="light">{meta.label}</Tag>
+          </GuideTip>
+        );
       },
     },
     {
       colKey: 'op',
       title: '操作',
-      width: 180,
+      width: 200,
       cell: ({ row }: any) => (
-        <Space>
+        <Space size={8}>
           <Button
             theme="default"
-            variant="text"
-            size="small"
+            variant="outline"
+            size="medium"
             onClick={() => {
               setCurrentMaterial(row);
               setDetailVisible(true);
@@ -296,8 +313,8 @@ export default memo(function MaterialsPage() {
             <PermGate perm="material:review" roles={['platform_admin', 'sub_admin', 'reviewer']}>
               <Button
                 theme="primary"
-                variant="text"
-                size="small"
+                variant="base"
+                size="medium"
                 onClick={() => {
                   setCurrentMaterial(row);
                   setReviewDecision('approved');
@@ -450,14 +467,24 @@ export default memo(function MaterialsPage() {
 
           <FormItem label="资格佐证附件">
             <input
+              ref={recFileInputRef}
               type="file"
               multiple
+              style={{ display: 'none' }}
               onChange={(e) => {
                 if (e.target.files) {
                   setRecFiles(Array.from(e.target.files));
                 }
               }}
             />
+            <Button
+              size="small"
+              variant="outline"
+              icon={<UploadIcon />}
+              onClick={() => recFileInputRef.current?.click()}
+            >
+              选择文件
+            </Button>
             <div style={{ color: '#7A7A7A', fontSize: 12, marginTop: 4 }}>
               支持上传身份证扫描件、任职表、学历证明等多份材料，支持原名原格式高速下载与图片预览。
             </div>
@@ -533,7 +560,9 @@ export default memo(function MaterialsPage() {
                 为该参选人补充上传佐证材料 / 审查附件
               </div>
               <input
+                ref={suppFileInputRef}
                 type="file"
+                style={{ display: 'none' }}
                 disabled={submitting}
                 onChange={async (e) => {
                   if (e.target.files?.[0] && currentMaterial) {
@@ -552,6 +581,15 @@ export default memo(function MaterialsPage() {
                   }
                 }}
               />
+              <Button
+                size="small"
+                variant="outline"
+                loading={submitting}
+                icon={<UploadIcon />}
+                onClick={() => suppFileInputRef.current?.click()}
+              >
+                选择文件上传
+              </Button>
             </div>
           </div>
         )}

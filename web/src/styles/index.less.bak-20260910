@@ -1,0 +1,366 @@
+:root {
+  /* ── 城厢区村居换届选举系统 · 中式政务 Design Tokens ──
+     主色沿用 TDesign 官方浅蓝（不覆盖 brand 系列）；仅定制底色/圆角/政务金辅助 */
+
+  /* ── 字体族 ── */
+  --font-base: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", Roboto, sans-serif;
+  --font-title: "PingFang SC", "Microsoft YaHei", "SimHei", sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, monospace;
+
+  /* ── 字号（px）── */
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+
+  /* ── 行高 / 字重 ── */
+  --lh-tight: 1.3;
+  --lh-normal: 1.5;
+  --lh-relaxed: 1.7;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ── 主色（TDesign 官方蓝）── */
+  --color-primary: #0052D9;
+  --color-primary-light: #E8F3FF;
+  --color-primary-hover: #366EF4;
+  --color-primary-active: #0034B5;
+
+  /* ── 功能色 ── */
+  --color-success: #2BA471;
+  --color-success-bg: #F2F9F5;
+  --color-warning: #E7700B;
+  --color-warning-bg: #FFF9EE;
+  --color-danger: #D54941;
+  --color-danger-bg: #FFF5F5;
+
+  /* ── 背景色 ── */
+  --bg-page: #F5F6F8;
+  --bg-container: #FFFFFF;
+  --bg-card: #FAF8F5;
+  --bg-hover: #F5F9FF;
+  --bg-selected: #EAF1FE;
+  --bg-disabled: #F3F3F3;
+
+  /* ── 边框色 ── */
+  --border-light: #ECE7E1;
+  --border-base: #DCDCDC;
+  --border-dark: #C9CDD4;
+
+  /* ── 文字色 ── */
+  --text-1: #1F2329;
+  --text-2: #4E5560;
+  --text-3: #8A909C;
+  --text-disabled: #BBBBBB;
+  --text-inverse: #FFFFFF;
+
+  /* ── 间距 ── */
+  --sp-4: 4px;
+  --sp-8: 8px;
+  --sp-12: 12px;
+  --sp-16: 16px;
+  --sp-20: 20px;
+  --sp-24: 24px;
+  --sp-32: 32px;
+
+  /* ── 圆角 ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* ── 阴影 ── */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* 辅助赤金（政务金徽章、高亮指示，克制使用） */
+  --gov-gold-color: #C8A45C;
+  --gov-gold-bg: #FAF6ED;
+  --gov-gold-border: #E8D3A5;
+
+  /* 页面底色与材质（中性偏冷，配官方浅蓝） */
+  --td-bg-color-page: #f5f6f8;
+  --td-bg-color-container: #ffffff;
+  --td-radius-default: 6px;
+  --td-radius-large: 8px;
+
+  /* 皮肤自有令牌（兼容旧代码） */
+  --skin-sidebar-bg: #fbfbfc;
+  --skin-sidebar-line: #ececf0;
+  --skin-text-1: #1f2329;
+  --skin-text-2: #4e5560;
+  --skin-text-3: #8a909c;
+  --skin-active-bg: #eaf1fe;
+  --skin-active-ink: var(--td-brand-color, #0052d9);
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-page);
+  font-family: var(--font-base);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+  color: var(--text-1);
+  letter-spacing: 0.2px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+
+/* ============================================================
+   全局皮肤 · 中式政务排版（纯 CSS，不动框架）
+   克制典雅：宣纸侧栏 · 书签式选中 · 清晰字距层级 · 呼吸留白
+   ============================================================ */
+
+/* ── 侧边栏：宣纸白底 + 右侧细分割 ── */
+.t-default-menu.t-menu,
+.t-menu {
+  background: var(--skin-sidebar-bg) !important;
+  border-right: 1px solid var(--skin-sidebar-line) !important;
+}
+/* logo 区底部分隔 */
+.t-menu__logo {
+  border-bottom: 1px solid var(--skin-sidebar-line);
+  height: 64px !important;
+}
+
+/* 分组标签：中式疏朗（选举管理/办理中/收尾归档/后台管理） */
+[class*="groupLabel"] {
+  padding: 18px 20px 6px !important;
+  font-size: 11px !important;
+  letter-spacing: 2px !important;
+  color: var(--skin-text-3) !important;
+  font-weight: 600 !important;
+}
+
+/* 一级菜单项：圆润卡片、留白、自然字号 */
+.t-default-menu .t-menu__item {
+  margin: 3px 10px !important;
+  border-radius: 8px !important;
+  height: 42px !important;
+  line-height: 42px !important;
+  color: var(--skin-text-2) !important;
+  font-size: 13.5px !important;
+  letter-spacing: 0.3px;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+.t-default-menu .t-menu__item:hover {
+  background: #f1f2f5 !important;
+  color: var(--skin-text-1) !important;
+}
+
+/* ★ 选中态：书签竖条 + 浅蓝底 + 主色字 + 字重（修复白底看不出差别） */
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) {
+  background: var(--skin-active-bg) !important;
+  color: var(--skin-active-ink) !important;
+  font-weight: 600 !important;
+  box-shadow: inset 3px 0 0 var(--skin-active-ink);
+}
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon,
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) [class*="menuIcon"] {
+  color: var(--skin-active-ink) !important;
+}
+
+/* 展开中的父级标题：深色字重、无底色 */
+.t-default-menu .t-submenu.t-is-opened > .t-menu__item,
+.t-default-menu .t-menu__item.t-is-opened {
+  color: var(--skin-text-1) !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+}
+
+/* 二级子菜单项：更轻、缩进 */
+.t-default-menu .t-submenu .t-submenu__inner .t-menu__item,
+.t-default-menu .t-menu__submenu .t-menu__item {
+  height: 38px !important;
+  line-height: 38px !important;
+  font-size: 13px !important;
+  color: #6b7280 !important;
+}
+
+/* 侧栏底部版本号 */
+[class*="menuTip"] {
+  font-size: 11px !important;
+  letter-spacing: 0.5px;
+  color: var(--skin-text-3) !important;
+}
+
+/* ── Header：毛玻璃白底 + 品牌标题中式字距 ── */
+.t-layout__header {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: saturate(1.2) blur(10px);
+  -webkit-backdrop-filter: saturate(1.2) blur(10px);
+  border-bottom: 1px solid #eeeef1 !important;
+  box-shadow: 0 1px 6px rgba(31, 35, 41, 0.03) !important;
+}
+[class*="brandTitle"] {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1.5px !important;
+  color: var(--skin-text-1) !important;
+}
+[class*="brandSub"] {
+  letter-spacing: 1px !important;
+  color: var(--skin-text-3) !important;
+}
+
+/* ── 全局排版层级（中式阅读节奏） ── */
+h1, h2, h3, h4 { letter-spacing: 0.3px; color: var(--skin-text-1); }
+.t-card__title, .t-dialog__header, .t-drawer__header {
+  font-weight: 600 !important;
+  letter-spacing: 0.3px;
+}
+.t-button { letter-spacing: 0.5px; }
+.t-form__label { letter-spacing: 0.2px; }
+
+/* 顶部与卡片微质感 */
+.t-card {
+  border-radius: 10px !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ============================================================
+   全局表格美化：舒适间距 · 斑马纹防窜行 · 卡片容器 · 自然呼吸感
+   ============================================================ */
+
+/* 卡片式容器：圆角 + 极淡阴影 + 溢出裁切 */
+.t-table {
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* 表头：浅灰底 + 深字 + 600字重 + 底部细线 */
+.t-table__header tr {
+  background-color: #fafbfc !important;
+}
+.t-table th {
+  color: #1f2329 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.3px;
+  border-bottom: 1px solid #eef0f3 !important;
+}
+.t-table th.t-table__cell {
+  padding: 14px 20px !important;
+}
+
+/* 单元格：舒适间距 + 自然行高 + 浅灰分隔线 */
+.t-table .t-table__cell {
+  padding: 14px 20px !important;
+  font-size: 13px !important;
+  line-height: 1.6 !important;
+  color: #33373d !important;
+  border-bottom: 1px solid #f2f3f5 !important;
+}
+
+/* 斑马纹：偶数行淡底色，防窜行（全局生效，不依赖 striped 属性） */
+.t-table .t-table__body tr:nth-child(even) > td {
+  background-color: #f7f9fc !important;
+}
+
+/* 行 hover：淡蓝过渡 150ms */
+.t-table .t-table__body tr:hover > td {
+  background-color: #f0f5ff !important;
+  transition: background-color 0.15s ease;
+}
+.t-table .t-table__body tr:nth-child(even):hover > td {
+  background-color: #e8f0fe !important;
+}
+
+/* 表格内 Tag 自然尺寸 */
+.t-table .t-tag {
+  font-size: 12px !important;
+  padding: 0 8px !important;
+  height: 24px !important;
+  line-height: 22px !important;
+  border-radius: 4px !important;
+}
+
+/* 表格内文字按钮 */
+.t-table .t-button--text {
+  font-size: 13px !important;
+  padding: 0 6px !important;
+}
+
+/* 操作列粘性固定在右侧（背景随行色/hover色） */
+.t-table .t-table__cell:last-child {
+  position: sticky;
+  right: 0;
+  background: inherit;
+  z-index: 2;
+  box-shadow: -4px 0 8px -4px rgba(0, 0, 0, 0.05);
+}
+.t-table .t-table__body tr:nth-child(even) > td:last-child {
+  background-color: #f7f9fc !important;
+}
+.t-table .t-table__body tr:hover > td:last-child {
+  background-color: #f0f5ff !important;
+}
+.t-table .t-table__body tr:nth-child(even):hover > td:last-child {
+  background-color: #e8f0fe !important;
+}
+
+/* 分页：与表格对齐，舒适间距 */
+.t-pagination {
+  margin-top: 16px !important;
+  padding: 0 4px !important;
+}
+
+/* 卡片内边距舒适 */
+.t-card__body {
+  padding: 20px !important;
+}
+
+/* 搜索栏间距 */
+.t-table-row-advanced {
+  margin-bottom: 16px !important;
+}
+
+/* ============================================================
+   全局滚动条：默认透明，hover 容器时淡显（不劣质、可用）
+   ============================================================ */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(0, 0, 0, 0.12) transparent;
+}

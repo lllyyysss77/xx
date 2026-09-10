@@ -2,16 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Button,
+  Dialog,
   Form,
   type FormInstanceFunctions,
   Input,
   MessagePlugin,
-  Select,
   Radio,
-  Space,
   type SubmitContext,
 } from 'tdesign-react';
-import { BrowseIcon, BrowseOffIcon, LockOnIcon, UserIcon } from 'tdesign-icons-react';
+import { BrowseIcon, BrowseOffIcon, ChevronRightIcon, LockOnIcon, UserIcon } from 'tdesign-icons-react';
 import classnames from 'classnames';
 import { getOrganizations, OrgItem } from '../../../../api/auth';
 import { useAuthStore } from '../../../../stores/useAuthStore';
@@ -20,50 +19,66 @@ import Style from './index.module.less';
 
 const { FormItem } = Form;
 
+const DEFAULT_PHONE = '13800000001';
+const DEFAULT_PASSWORD = '123456';
+
 export default function Login() {
   const [showPsw, toggleShowPsw] = useState(false);
   const [filterType, setFilterType] = useState<'village' | 'community'>('village');
   const [allOrgs, setAllOrgs] = useState<OrgItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState<OrgItem | null>(null);
+  const [loading, setLoading] = useState(true);
   const formRef = useRef<FormInstanceFunctions>();
   const navigate = useNavigate();
   const authLogin = useAuthStore((s) => s.login);
 
-  // 拉取真实组织列表（按村/社区物理双轨区分）
+  // 拉取真实组织列表
   useEffect(() => {
     let alive = true;
+    setLoading(true);
     getOrganizations()
       .then((list) => {
-        if (!alive || !list?.length) return;
-        setAllOrgs(list);
-        // 默认选中第一个村
-        const first = list.find((o) => o.orgType === 'village') || list[0];
-        if (first && formRef.current) {
-          formRef.current.setFieldsValue({ organizationId: first.id });
+        if (!alive) return;
+        setAllOrgs(list || []);
+        if (list?.length) {
+          const preferred = list.find((o) => o.name.includes('霞皋') || o.slug.includes('xiagao'))
+            || list.find((o) => o.orgType === 'village')
+            || list[0];
+          if (preferred) {
+            setSelectedOrg(preferred);
+            setFilterType(preferred.orgType as 'village' | 'community');
+          }
         }
       })
-      .catch(() => {
-        if (alive) setAllOrgs([]);
-      });
-    return () => {
-      alive = false;
-    };
+      .catch(() => { if (alive) setAllOrgs([]); })
+      .finally(() => { if (alive) setLoading(false); });
+    return () => { alive = false; };
   }, []);
 
-  // 根据当前选择的「村」或「社区」过滤下拉选项
-  const currentOptions = allOrgs
-    .filter((o) => o.orgType === filterType)
-    .map((o) => ({
-      label: `${filterType === 'community' ? '🏘 社区' : '🏡 村'} · ${o.name}`,
-      value: o.id,
-    }));
+  // 表单初始值填充（数据就绪后一次性写入）
+  useEffect(() => {
+    if (loading || !formRef.current) return;
+    formRef.current.setFieldsValue({
+      organizationId: selectedOrg?.id || '',
+      phone: DEFAULT_PHONE,
+      password: DEFAULT_PASSWORD,
+    });
+  }, [loading, selectedOrg]);
 
-  const onTypeChange = (val: any) => {
-    setFilterType(val);
-    const matched = allOrgs.filter((o) => o.orgType === val);
-    if (matched[0] && formRef.current) {
-      formRef.current.setFieldsValue({ organizationId: matched[0].id });
-    }
+  const villageList = allOrgs
+    .filter((o) => o.orgType === 'village')
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+
+  const communityList = allOrgs
+    .filter((o) => o.orgType === 'community')
+    .sort((a, b) => a.name.localeCompare(b.name, 'zh-Hans-CN'));
+
+  const handlePickOrg = (org: OrgItem) => {
+    setSelectedOrg(org);
+    formRef.current?.setFieldsValue({ organizationId: org.id });
+    setPickerVisible(false);
   };
 
   const onSubmit = async (e: SubmitContext) => {
@@ -86,45 +101,45 @@ export default function Login() {
     }
   };
 
+  const typeLabel = filterType === 'community' ? '社区' : '行政村';
+
   return (
     <div>
       <Form ref={formRef} className={classnames(Style.itemContainer)} labelWidth={0} onSubmit={onSubmit}>
-        {/* ① 起手村/社区严格双轨切页 */}
+        {/* ① 村/社区双轨切换 */}
         <div style={{ marginBottom: 16, textAlign: 'center' }}>
-          <Radio.Group
-            variant="default-filled"
-            value={filterType}
-            onChange={onTypeChange}
-            size="large"
-          >
+          <Radio.Group variant="default-filled" value={filterType} onChange={(v) => setFilterType(v as any)} size="large">
             <Radio.Button value="village">🏡 农村行政村</Radio.Button>
             <Radio.Button value="community">🏘 城市社区</Radio.Button>
           </Radio.Group>
         </div>
 
-        {/* ② 对应村/社区下拉选择 */}
-        <FormItem
-          name="organizationId"
-          rules={[{ required: true, message: '请选择您的归属村或社区', type: 'error' }]}
-        >
-          <Select
-            size="large"
-            placeholder={currentOptions.length ? `请选择${filterType === 'community' ? '社区' : '行政村'}` : '加载中…'}
-            options={currentOptions}
-            filterable
-            disabled={!currentOptions.length}
-          />
+        {/* ② 归属地选择 —— 点击弹出面板 */}
+        <FormItem name="organizationId" rules={[{ required: true, message: '请选择您的归属村或社区', type: 'error' }]}>
+          <div
+            className={Style.orgPicker}
+            onClick={() => !loading && setPickerVisible(true)}
+            style={{ cursor: loading ? 'not-allowed' : 'pointer' }}
+          >
+            {loading ? (
+              <span style={{ color: 'var(--td-text-color-placeholder)' }}>加载中…</span>
+            ) : selectedOrg ? (
+              <span style={{ color: 'var(--td-text-color-primary)' }}>
+                {selectedOrg.orgType === 'community' ? '🏘' : '🏡'} {selectedOrg.name}
+              </span>
+            ) : (
+              <span style={{ color: 'var(--td-text-color-placeholder)' }}>请选择{typeLabel}</span>
+            )}
+            <ChevronRightIcon style={{ color: 'var(--td-text-color-placeholder)' }} />
+          </div>
         </FormItem>
 
-        {/* ③ 手机号 (后台超管授权预设) */}
-        <FormItem
-          name="phone"
-          rules={[{ required: true, message: '请输入手机号', type: 'error' }]}
-        >
+        {/* ③ 手机号 */}
+        <FormItem name="phone" rules={[{ required: true, message: '请输入手机号', type: 'error' }]}>
           <Input size="large" maxlength={11} placeholder="请输入登录手机号" prefixIcon={<UserIcon />} />
         </FormItem>
 
-        {/* ④ 初始默认密码 123456 */}
+        {/* ④ 密码 */}
         <FormItem name="password" rules={[{ required: true, message: '请输入登录密码', type: 'error' }]}>
           <Input
             size="large"
@@ -133,11 +148,9 @@ export default function Login() {
             placeholder="请输入密码（默认 123456）"
             prefixIcon={<LockOnIcon />}
             suffixIcon={
-              showPsw ? (
-                <BrowseIcon onClick={() => toggleShowPsw((c) => !c)} />
-              ) : (
-                <BrowseOffIcon onClick={() => toggleShowPsw((c) => !c)} />
-              )
+              showPsw
+                ? <BrowseIcon onClick={() => toggleShowPsw((c) => !c)} />
+                : <BrowseOffIcon onClick={() => toggleShowPsw((c) => !c)} />
             }
           />
         </FormItem>
@@ -152,6 +165,60 @@ export default function Login() {
           </Button>
         </FormItem>
       </Form>
+
+      {/* 归属地选择弹窗 */}
+      <Dialog
+        visible={pickerVisible}
+        onClose={() => setPickerVisible(false)}
+        title={`选择${typeLabel}`}
+        placement="center"
+        width={420}
+        confirmBtn={null}
+        cancelBtn="关闭"
+        onCancel={() => setPickerVisible(false)}
+      >
+        <div className={Style.orgList}>
+          {villageList.length > 0 && (
+            <div className={Style.orgGroup}>
+              <div className={Style.orgGroupTitle}>🏡 农村行政村</div>
+              {villageList.map((org) => (
+                <div
+                  key={org.id}
+                  className={classnames(Style.orgItem, { [Style.orgItemActive]: selectedOrg?.id === org.id })}
+                  onClick={() => handlePickOrg(org)}
+                >
+                  <span>{org.name}</span>
+                  {selectedOrg?.id === org.id && (
+                    <span style={{ color: 'var(--td-brand-color)', fontSize: 12 }}>已选</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {communityList.length > 0 && (
+            <div className={Style.orgGroup}>
+              <div className={Style.orgGroupTitle}>🏘 城市社区</div>
+              {communityList.map((org) => (
+                <div
+                  key={org.id}
+                  className={classnames(Style.orgItem, { [Style.orgItemActive]: selectedOrg?.id === org.id })}
+                  onClick={() => handlePickOrg(org)}
+                >
+                  <span>{org.name}</span>
+                  {selectedOrg?.id === org.id && (
+                    <span style={{ color: 'var(--td-brand-color)', fontSize: 12 }}>已选</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+          {allOrgs.length === 0 && !loading && (
+            <div style={{ textAlign: 'center', padding: 32, color: 'var(--td-text-color-secondary)' }}>
+              暂无可用组织
+            </div>
+          )}
+        </div>
+      </Dialog>
     </div>
   );
 }

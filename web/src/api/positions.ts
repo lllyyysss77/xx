@@ -41,7 +41,7 @@ export const getPositions = (params?: { electionFiefId?: string }): Promise<Posi
       fiefName: r.fiefName || '',
       name: r.name || '',
       quota: r.quota ?? 0,
-      electionMethod: r.electionMethod || '全民直接选举',
+      electionMethod: r.electionMethod || '直接选举',
       requirement: r.requirement || '',
       applicationStart: r.applicationStart || '',
       applicationEnd: r.applicationEnd || '',
@@ -56,8 +56,9 @@ export const getPositions = (params?: { electionFiefId?: string }): Promise<Posi
 export const uploadPositionFile = (positionId: string, file: File): Promise<PositionFile> => {
   const fd = new FormData();
   fd.append('file', file);
-  // 不手动设 Content-Type：浏览器需自动携带 multipart boundary（client 拦截器已对 FormData 删除该头）
-  return request.post(`/admin/positions/${positionId}/file`, fd);
+  return request.post(`/admin/positions/${positionId}/file`, fd, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 };
 
 // 删除岗位附件

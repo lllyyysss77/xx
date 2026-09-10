@@ -19,6 +19,8 @@ import { FileList } from '../../components/FileList';
 import { getFileUrl } from '../../api/files';
 import { ElectionSessionList } from '../../components/ElectionSessionList';
 import { SessionDetailBar } from '../../components/ElectionSessionList/SessionDetailBar';
+import { CellText } from '../../components/CellText';
+import { IconActions } from '../../components/IconActions';
 
 export default memo(function PositionsPage() {
   const [list, setList] = useState<Position[]>([]);
@@ -38,9 +40,13 @@ export default memo(function PositionsPage() {
     setLoading(true);
     try {
       const fiefData = await getElectionFiefs();
-      setFiefs(fiefData);
+      // 本页活动列表按创建时间倒序：最新创建的排最前（后端默认按 d_day 降序返回）
+      const sortedFiefs = [...fiefData].sort((a, b) =>
+        String(b.createdAt || '').localeCompare(String(a.createdAt || '')),
+      );
+      setFiefs(sortedFiefs);
 
-      const targetFiefId = currentFiefId || (fiefData[0]?.id ?? '');
+      const targetFiefId = currentFiefId || (sortedFiefs[0]?.id ?? '');
       if (targetFiefId) {
         const data = await getPositions({ electionFiefId: targetFiefId });
         setList(data);
@@ -109,27 +115,29 @@ export default memo(function PositionsPage() {
     {
       colKey: 'applicationTime',
       title: '法定报名起止周期',
-      minWidth: 220,
+      minWidth: 180,
       cell: ({ row }: any) => (
-        <span style={{ fontSize: 13, color: '#4E5969' }}>
-          {row.applicationStart ? `${row.applicationStart} 至 ${row.applicationEnd}` : '随 D-day 依法倒排'}
-        </span>
+        <CellText
+          main={row.applicationStart ? `${row.applicationStart} 至 ${row.applicationEnd}` : '随 D-day 依法倒排'}
+          sub="法定报名周期"
+        />
       ),
     },
     {
       colKey: 'materialReviewTime',
       title: '材料审查周期',
-      minWidth: 220,
+      minWidth: 180,
       cell: ({ row }: any) => (
-        <span style={{ fontSize: 13, color: '#4E5969' }}>
-          {row.materialReviewStart ? `${row.materialReviewStart} 至 ${row.materialReviewEnd}` : 'D-15 ~ D-13 初审'}
-        </span>
+        <CellText
+          main={row.materialReviewStart ? `${row.materialReviewStart} 至 ${row.materialReviewEnd}` : 'D-15 ~ D-13 初审'}
+          sub="材料资格审查窗口"
+        />
       ),
     },
     {
       colKey: 'status',
       title: '当前状态',
-      width: 140,
+      width: 120,
       cell: ({ row }: any) => {
         const meta = getPositionRealStatus(row);
         return <Tag theme={meta.theme} variant="light">{meta.label}</Tag>;
@@ -138,19 +146,20 @@ export default memo(function PositionsPage() {
     {
       colKey: 'op',
       title: '操作',
-      width: 140,
+      width: 80,
       cell: ({ row }: any) => (
-        <Button
-          theme="primary"
-          variant="text"
-          size="small"
-          onClick={() => {
-            setCurrentPos(row);
-            setDetailVisible(true);
-          }}
-        >
-          岗位明细
-        </Button>
+        <IconActions
+          items={[
+            {
+              icon: <BrowseIcon />,
+              title: '岗位明细',
+              onClick: () => {
+                setCurrentPos(row);
+                setDetailVisible(true);
+              },
+            },
+          ]}
+        />
       ),
     },
   ];

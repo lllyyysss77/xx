@@ -4,6 +4,7 @@
 
 .pageWithColor {
   background: var(--td-bg-color-container);
-  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 3px;
+  /* 平面容器用 hairline 定边界，不用阴影堆叠 */
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
 }

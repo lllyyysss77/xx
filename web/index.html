@@ -5,9 +5,18 @@
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>城厢区村居换届选举系统</title>
+    <!-- [ENV-CONFIG] 灾难版：能走 CDN 的稳定库全部走 CDN，差机不本地打包（版本锁定 package.json 实装） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tdesign-react@1.18.3/dist/tdesign.min.css" />
   </head>
   <body>
     <div id="app"></div>
+    <!-- 加载顺序不可变：react → react-dom → tdesign → icons → axios → classnames → 应用 -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tdesign-react@1.18.3/dist/tdesign.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tdesign-icons-react@0.6.11/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.20.0/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/classnames@2.5.1/index.min.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

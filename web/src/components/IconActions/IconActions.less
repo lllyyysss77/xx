@@ -1,0 +1,27 @@
+/* 表格操作列图标按钮组 */
+
+.icon-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.icon-actions__btn {
+  color: var(--color-primary, #1e3a8a);
+  font-size: 16px !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 6px !important;
+
+  &:hover {
+    background: var(--color-primary-light, #f1f4fb) !important;
+  }
+
+  /* 危险操作：印章红（danger 属性加 is-danger 类） */
+  &.is-danger {
+    color: var(--seal, #b91c1c);
+    &:hover {
+      background: var(--seal-light, #fdf1f1) !important;
+    }
+  }
+}

@@ -1,38 +1,240 @@
-:root {
-  /* ── 城厢区村居换届选举系统 · 红金政务皮 Design Tokens ── */
-  --td-brand-color: #B22222;               /* 核心主红（中国红/印章红） */
-  --td-brand-color-focus: #8B1A1A;
-  --td-brand-color-active: #8B1A1A;
-  --td-brand-color-disabled: #EAAFAF;
-  --td-brand-color-light: #FDF4F4;          /* 柔和红晕 */
-  --td-brand-color-light-hover: #F9E2E2;
-  --td-brand-color-1: #FDF4F4;
-  --td-brand-color-2: #F9E2E2;
-  --td-brand-color-3: #F0BDBD;
-  --td-brand-color-4: #E59595;
-  --td-brand-color-5: #D86B6B;
-  --td-brand-color-6: #C94242;
-  --td-brand-color-7: #B22222;
-  --td-brand-color-8: #981919;
-  --td-brand-color-9: #7F1212;
+/* ============================================================================
+   城厢区村居换届选举系统 · 全局皮肤
+   设计纲领（三条来源，缺一不可）：
+   ① guizang 电子杂志派：结构优于装饰 —— 层级靠「字体对比 + 字号 + 留白 + hairline」建立，
+      不用阴影堆叠、不用渐变假装层级。
+   ② 夏夏偏好色：墨蓝 #1e3a8a（唯一锚点色）+ 印章红 #b91c1c（唯一强调色）+ 米白纸底。
+   ③ ayuan-xiaxia-layout-style：主舞台是主角，辅助信息软化下沉，强提醒用小信号不用大色块。
 
-  /* 辅助赤金（政务金徽章、高亮指示） */
-  --gov-gold-color: #C8A45C;
-  --gov-gold-bg: #FAF6ED;
-  --gov-gold-border: #E8D3A5;
+   改动范围：仅样式。不动任何 ts/tsx。
+   ============================================================================ */
 
-  /* 宣纸底色与柔和材质 */
-  --td-bg-color-page: #FAF8F5;              /* 宣纸温润底色 */
-  --td-bg-color-container: #FFFFFF;
-  --td-radius-default: 6px;
-  --td-radius-large: 8px;
+/* ⚠️ 选择器必须带 :root[theme-mode='light']：
+   TDesign 把令牌定义在 `:root,:root[theme-mode=light]`（特异性 0,1,1），
+   main.tsx 又给 <html> 打了 theme-mode="light"。只写 :root（0,1,0）会被组件库反压，
+   导致下面的 --td-* 全部失效（旧版 --td-bg-color-page 就是这么悄无声息失效的）。 */
+:root,
+:root[theme-mode='light'] {
+  /* ── 字体族 ──
+     标题宋体（书卷气、官方感）；正文黑体（屏幕可读）；元数据等宽（对齐、防抖） */
+  --font-serif: 'Songti SC', 'Noto Serif SC', 'Source Han Serif SC', 'Source Han Serif CN', 'STSong', 'SimSun', '宋体', serif;
+  --font-base: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+  --font-title: var(--font-serif);
+  --font-mono: 'SF Mono', 'DIN Alternate', Menlo, Consolas, 'Courier New', monospace;
+
+  /* ── 字号（px）── */
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-18: 18px;
+  --fs-20: 20px;
+  --fs-24: 24px;
+  --fs-28: 28px;
+  --fs-32: 32px;
+
+  /* ── 行高 / 字重：中文正文不低于 1.6，否则密排发闷 ── */
+  --lh-tight: 1.4;
+  --lh-normal: 1.6;
+  --lh-relaxed: 1.75;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+
+  /* ── 主色 · 墨蓝（唯一锚点色）── */
+  --color-primary: #1e3a8a;
+  --color-primary-light: #f1f4fb;
+  --color-primary-hover: #2b4bab;
+  --color-primary-active: #16296b;
+
+  /* ── 强调色 · 印章红（仅用于驳回/超期/危险，全站唯一，不可当装饰用）── */
+  --seal: #b91c1c;
+  --seal-light: #fdf1f1;
+
+  /* ── 功能色（全部降饱和，政务场合不刺眼）
+       ⚠️ 取值受 WCAG AA 约束：文字色在自身浅色底上必须 ≥4.5:1，
+          边框/图形色在白底上必须 ≥3:1。改色前先跑 .tmp/wcag.js 验证，别凭肉眼。── */
+  --color-success: #1f7a55;
+  --color-success-bg: #eef7f2;
+  --color-warning: #9c5b00; /* 原 #b26a00 在 #fdf6ea 上仅 3.95:1（不达标），加深至此 5.00:1 */
+  --color-warning-bg: #fdf6ea;
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fdf1f1;
+
+  /* ── 背景 · 建立清晰对比层级（去苍白） ── */
+  --bg-page: #f0f2f5;
+  --bg-container: #ffffff;
+  --bg-card: #ffffff;
+  --bg-hover: #f4f6fb;
+  --bg-selected: #eef2fb;
+  --bg-disabled: #f5f4f2;
+
+  /* ── 边框 · 柔和灰 ── */
+  --border-light: #e8eaed;
+  --border-base: #d9dcde;
+  --border-dark: #c5c9cc;
+
+  /* ── 文字 ──
+     适老化硬底线：--text-3 是次级说明文字，阿姨大叔也要看得清。
+     原 #8a909c 在白底仅 3.21:1（WCAG AA 要 4.5:1），已加深至 #6b7280（4.83:1）。── */
+  --text-1: #1a1f36;
+  --text-2: #4e5969;
+  --text-3: #6b7280;
+  --text-disabled: #8a909c; /* 3.21:1 —— 禁用态虽豁免 WCAG，仍保 ≥3:1 可辨 */
+  --text-inverse: #ffffff;
+
+  /* ── 间距 ── */
+  --sp-4: 4px;
+  --sp-8: 8px;
+  --sp-12: 12px;
+  --sp-16: 16px;
+  --sp-20: 20px;
+  --sp-24: 24px;
+  --sp-32: 32px;
+
+  /* ── 圆角 ── */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+
+  /* ── 阴影：卡片立体微阴影，彻底消除苍白扁平 ── */
+  --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* 辅助赤金（政务金徽章、高亮指示，克制使用） */
+  --gov-gold-color: #a08040;
+  --gov-gold-bg: #faf6ed;
+  --gov-gold-border: #e8d3a5;
+
+  /* ── 侧边栏深色风格（立骨架，后台管理经典）──
+     ⚠️ 透明度即对比度：white@0.45 在 #1a1f36 上只有 4.36:1（不达标），
+        分组标签/提示文字因此发灰发虚。统一提到 0.55 → 5.80:1。
+     ⚠️ 选中条原本用 #3b82f6（Tailwind 亮蓝），与全站墨蓝 #1e3a8a 不是同族，
+        这是页面「说不上来的难受」的根因之一；改用墨蓝梯度第 4 阶 #93aae6（7.06:1），
+        既统一家族，又在深底上比原色更醒目。── */
+  --skin-sidebar-bg: #1a1f36;
+  --skin-sidebar-line: rgba(255, 255, 255, 0.08);
+  --skin-text-1: #ffffff;
+  --skin-text-2: rgba(255, 255, 255, 0.72);
+  --skin-text-3: rgba(255, 255, 255, 0.55);
+  --skin-active-ink: #ffffff;
+  --skin-active-bg: rgba(147, 170, 230, 0.18);
+  --skin-active-bar: #93aae6;
+
+  /* ==========================================================
+     TDesign 令牌覆盖：把组件库整体拉到「墨蓝 + 米白」同一套语言
+     ========================================================== */
+
+  /* 品牌 · 墨蓝梯度 */
+  --td-brand-color: #1e3a8a;
+  --td-brand-color-hover: #2b4bab;
+  --td-brand-color-active: #16296b;
+  --td-brand-color-focus: #bccbf0;
+  --td-brand-color-disabled: #bccbf0;
+  --td-brand-color-light: #f1f4fb;
+  --td-brand-color-light-hover: #e5ebf9;
+  --td-brand-color-1: #f1f4fb;
+  --td-brand-color-2: #dde5f7;
+  --td-brand-color-3: #bccbf0;
+  --td-brand-color-4: #93aae6;
+  --td-brand-color-5: #6a86d6;
+  --td-brand-color-6: #4a67c0;
+  --td-brand-color-7: #2f4ba8;
+  --td-brand-color-8: #1e3a8a;
+  --td-brand-color-9: #1a3275;
+  --td-brand-color-10: #132555;
+
+  /* 错误 · 印章红 */
+  --td-error-color: #b91c1c;
+  --td-error-color-hover: #c62d2d;
+  --td-error-color-active: #9c1717;
+  --td-error-color-focus: #f6bfbf;
+  --td-error-color-light: #fdf1f1;
+  --td-error-color-light-hover: #fbe0e0;
+  --td-error-color-1: #fdf1f1;
+  --td-error-color-2: #fbe0e0;
+  --td-error-color-3: #f6bfbf;
+  --td-error-color-4: #ec9797;
+  --td-error-color-5: #e06f6f;
+  --td-error-color-6: #cf4a4a;
+  --td-error-color-7: #c22f2f;
+  --td-error-color-8: #b91c1c;
+  --td-error-color-9: #a01818;
+  --td-error-color-10: #7d1212;
+
+  /* 成功 / 警告：降饱和 */
+  --td-success-color: #1f7a55;
+  --td-success-color-hover: #2b8c66;
+  --td-success-color-active: #1a6747;
+  --td-success-color-light: #eef7f2;
+  --td-success-color-light-hover: #dceee6;
+  --td-success-color-3: #a9d9c2;
+  --td-success-color-5: #4aa683;
+
+  --td-warning-color: #9c5b00;
+  --td-warning-color-hover: #b06a00;
+  --td-warning-color-active: #7a4900;
+  --td-warning-color-light: #fdf6ea;
+  --td-warning-color-light-hover: #faeed9;
+  --td-warning-color-3: #f0cf9c;
+  --td-warning-color-5: #d99a3c;
+
+  /* 文字 */
+  --td-text-color-primary: #1a1f36;
+  --td-text-color-secondary: #4e5969;
+  --td-text-color-placeholder: #6b7280; /* 原 #8a909c 仅 3.21:1 → 提到 4.83:1 */
+  --td-text-color-disabled: #8a909c;
+  --td-text-color-brand: #1e3a8a;
+  --td-text-color-link: #1e3a8a;
+
+  /* 背景 */
+  --td-bg-color-page: #f0f2f5;
+  --td-bg-color-container: #ffffff;
+  --td-bg-color-container-hover: #f4f6fb;
+  --td-bg-color-container-active: #eef2fb;
+  --td-bg-color-container-select: #eef2fb;
+  --td-bg-color-secondarycontainer: #f5f6f8;
+  --td-bg-color-secondarycontainer-hover: #eceef2;
+  --td-bg-color-component: #ffffff;
+  --td-bg-color-component-hover: #f4f6fb;
+  --td-bg-color-component-active: #eef2fb;
+  --td-bg-color-component-disabled: #f5f4f2;
+
+  /* 描边 */
+  --td-border-level-1-color: #ece8e2;
+  --td-border-level-2-color: #e7e3dc;
+  --td-component-stroke: #e5e1da;
+  --td-component-border: #d6d1c8;
+
+  /* 圆角 / 阴影 */
+  --td-radius-small: 3px;
+  --td-radius-default: 4px;
+  --td-radius-medium: 6px;
+  --td-radius-large: 6px;
+  --td-radius-extraLarge: 8px;
+  --td-shadow-1: 0 1px 2px rgba(26, 29, 36, 0.04);
+  --td-shadow-2: 0 2px 8px rgba(26, 29, 36, 0.06);
+  --td-shadow-3: 0 12px 32px rgba(26, 29, 36, 0.14);
+  --td-table-shadow-color: rgba(26, 29, 36, 0.06);
+
+  --td-font-family: var(--font-base);
 }
 
+/* ============================================================
+   基础排版
+   ============================================================ */
 body {
   margin: 0;
-  background-color: var(--td-bg-color-page);
-  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Segoe UI", 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
-    'Droid Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-page);
+  font-family: var(--font-base);
+  font-size: var(--fs-14);
+  line-height: var(--lh-normal);
+  color: var(--text-1);
+  letter-spacing: 0.2px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -47,26 +249,396 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
 
-/* 顶部与卡片精美微质感阴影 */
-.t-card {
-  border-radius: 8px !important;
-  border: 1px solid rgba(200, 164, 92, 0.2) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+/* ── 标题：宋体 + 字距，建立「书卷气」层级。
+      只在 ≥16px 用宋体；13-14px 的小标题保持黑体，宋体小字会糊 ── */
+h1, h2, h3, h4 {
+  font-family: var(--font-title);
+  letter-spacing: 1px;
+  color: var(--text-1);
+  line-height: var(--lh-tight);
+}
+h1 { font-size: var(--fs-24); }
+h2 { font-size: var(--fs-20); }
+h3 { font-size: var(--fs-18); }
+h4 { font-size: var(--fs-16); }
+
+/* 卡片 / 弹层标题：宋体 + 左侧墨蓝细标尺（比加粗更能定位层级） */
+.t-card__title,
+.t-dialog__header,
+.t-drawer__header {
+  font-family: var(--font-title) !important;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px;
 }
 
-/* 表格头部微金质感 */
-.t-table__header tr {
-  background-color: #FAF8F5 !important;
+.t-button {
+  letter-spacing: 0.5px;
+  /* 圆润显眼：大龄用户点得中。主按钮微阴影提存在感，hover 150ms 过渡 */
+  border-radius: 8px !important;
+  font-weight: 500;
 }
-.t-table th {
-  color: #555555 !important;
+.t-button--theme-primary:not(.t-button--variant-outline):not(.t-button--variant-dashed) {
+  box-shadow: 0 1px 3px rgba(30, 58, 138, 0.28);
+}
+.t-button {
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+.t-form__label { letter-spacing: 0.2px; }
+
+/* 数字一律等宽对齐，表格里才不会左右跳动 */
+.t-table,
+.t-pagination,
+.t-descriptions {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   侧边栏：深色绀青背景 + 高对比度清晰导航
+   ============================================================ */
+.t-default-menu.t-menu,
+.t-menu {
+  background: var(--skin-sidebar-bg) !important;
+  border-right: 1px solid var(--skin-sidebar-line) !important;
+}
+
+.t-menu__logo {
+  border-bottom: 1px solid var(--skin-sidebar-line);
+  height: 64px !important;
+  color: #ffffff !important;
+}
+.t-menu__logo h1, .t-menu__logo span {
+  color: #ffffff !important;
+}
+
+/* 分组标签：字距疏朗、低对比度提示（12px 是适老化最小字号底线） */
+[class*='groupLabel'] {
+  padding: 16px 20px 6px !important;
+  font-size: 12px !important;
+  letter-spacing: 1.5px !important;
+  color: var(--skin-text-3) !important;
   font-weight: 600 !important;
 }
 
-/* 选中项红底白字 */
-.t-menu__item.t-is-active:not(.t-is-opened) {
-  background-color: var(--td-brand-color-light) !important;
-  color: var(--td-brand-color) !important;
-  border-right: 3px solid var(--td-brand-color) !important;
+.t-default-menu .t-menu__item {
+  margin: 4px 12px !important;
+  border-radius: 6px !important;
+  height: 44px !important; /* 适老化：44×44 触控目标 WCAG AAA */
+  line-height: 44px !important;
+  color: var(--skin-text-2) !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.3px;
+  transition: all 0.2s ease;
 }
 
+.t-default-menu .t-menu__item:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+/* ★ 选中态：深底透亮 + 左侧 3.5px 墨蓝家族亮条（--skin-active-bar #93aae6，7.06:1），
+      阿姨一秒看懂当前在哪里 */
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) {
+  background: var(--skin-active-bg) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  box-shadow: inset 3.5px 0 0 var(--skin-active-bar) !important;
+}
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) .t-icon,
+.t-default-menu .t-menu__item.t-is-active:not(.t-is-opened) [class*='menuIcon'] {
+  color: var(--skin-active-bar) !important;
+}
+
+.t-default-menu .t-submenu.t-is-opened > .t-menu__item,
+.t-default-menu .t-menu__item.t-is-opened {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+}
+
+.t-default-menu .t-submenu .t-submenu__inner .t-menu__item,
+.t-default-menu .t-menu__submenu .t-menu__item {
+  height: 40px !important;
+  line-height: 40px !important;
+  font-size: 15px !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+.t-default-menu .t-submenu .t-submenu__inner .t-menu__item:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+[class*='menuTip'] {
+  font-size: 12px !important; /* 原 11px 且重复定义两遍（复制粘贴残留），合并并提到适老化底线 */
+  letter-spacing: 0.5px;
+  color: var(--skin-text-3) !important;
+}
+
+/* ============================================================
+   Header：实心白 + hairline。
+   去掉毛玻璃 —— 后台不需要「氛围」，backdrop-filter 在集显机器上还掉帧
+   ============================================================ */
+.t-layout__header {
+  background: #ffffff !important;
+  border-bottom: 1px solid var(--skin-sidebar-line) !important;
+  box-shadow: 0 4px 12px rgba(26, 31, 54, 0.1) !important;
+}
+[class*='brandTitle'] {
+  font-family: var(--font-title) !important;
+  font-size: 17px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1.5px !important;
+  color: var(--skin-text-1) !important;
+}
+[class*='brandSub'] {
+  letter-spacing: 1px !important;
+  color: var(--skin-text-3) !important;
+}
+
+/* ============================================================
+   容器：平面化（hairline 定边界，米白书卷底，不用廉价粗虚线）
+   ============================================================ */
+.t-card {
+  border-radius: 8px !important;
+  border: 1px solid var(--border-base) !important;
+  background-color: #ffffff !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 浮层仍然需要阴影 —— 它真的浮在页面之上 */
+.t-dialog,
+.t-drawer,
+.t-popup__content,
+.t-select-input,
+.t-tooltip {
+  box-shadow: var(--shadow-lg) !important;
+  border-radius: 8px !important;
+}
+
+/* ============================================================
+   表格：政务后台的主战场。实线收敛、端庄清爽、大字号易读、大触控区
+   ============================================================ */
+/* 1. 统一表格容器样式：实线细边框，禁止粗糙虚线 */
+.t-table {
+  border: 1px solid var(--border-base) !important;
+  border-radius: 8px !important;
+  background-color: #ffffff !important;
+  overflow: hidden !important;
+}
+
+/* 表头：米白纸底 + 墨蓝深色字 + 14px加粗 + 实线分割 */
+.t-table__header tr {
+  background-color: #f7f5f1 !important;
+}
+
+.t-table th {
+  color: var(--color-primary) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: 0.5px;
+  background-color: #f7f5f1 !important;
+  border-bottom: 1px solid var(--border-base) !important;
+  border-right: 1px solid #edebe8 !important;
+}
+
+.t-table th.t-table__cell {
+  padding: 14px 16px !important;
+}
+
+/* 单元格：15px 适老化大字号，呼吸空间充足，浅实线微分隔 */
+.t-table .t-table__cell {
+  padding: 14px 16px !important;
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+  color: var(--text-1) !important;
+  border-bottom: 1px solid #f0f0f0 !important;
+  border-right: 1px solid #f6f6f6 !important;
+}
+
+/* 2. 按钮体系：大号易点、色彩鲜明、层次分明 */
+/* 主操作按钮：墨蓝底 + 白字 + 饱满高度 */
+.t-button--theme-primary:not(.t-button--variant-outline):not(.t-button--variant-dashed):not(.t-button--variant-text) {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.t-button--theme-primary:not(.t-button--variant-outline):not(.t-button--variant-dashed):not(.t-button--variant-text):hover {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
+/* 次级/描边按钮：浅色墨蓝高光，不抢主按钮视线 */
+.t-button--theme-primary.t-button--variant-outline,
+.t-button--theme-default.t-button--variant-outline {
+  border: 1px solid var(--color-primary) !important;
+  color: var(--color-primary) !important;
+  background-color: var(--color-primary-light) !important;
+  font-weight: 500 !important;
+}
+
+/* 警告/危险类按钮：印章红 */
+.t-button--theme-danger {
+  background-color: var(--seal) !important;
+  border-color: var(--seal) !important;
+  color: #ffffff !important;
+}
+
+/* 3. 卡片优化：端庄书卷气，无虚线干扰 */
+.t-card__title {
+  color: var(--color-primary) !important;
+  font-family: var(--font-title) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border-light) !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 14px !important;
+}
+
+.t-card__body {
+  padding: 20px !important;
+}
+
+/* 斑马纹压到几乎不可见：只起防窜行作用，不承担视觉重量 */
+.t-table .t-table__body tr:nth-child(even) > td {
+  background-color: #fcfbf9 !important;
+}
+
+.t-table .t-table__body tr:hover > td {
+  background-color: #f2f5fc !important;
+  transition: background-color 0.15s ease;
+}
+.t-table .t-table__body tr:nth-child(even):hover > td {
+  background-color: #e9effa !important;
+}
+
+.t-table .t-tag {
+  font-size: 12px !important;
+  padding: 0 8px !important;
+  height: 22px !important;
+  line-height: 20px !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.t-table .t-button--text {
+  font-size: 14px !important;
+  padding: 0 6px !important;
+}
+
+/* 操作列粘性固定（背景随行色/hover 色同步，否则透出下层文字） */
+.t-table .t-table__cell:last-child {
+  position: sticky;
+  right: 0;
+  background: inherit;
+  z-index: 2;
+  box-shadow: -6px 0 8px -6px rgba(26, 29, 36, 0.08);
+}
+.t-table .t-table__body tr:nth-child(even) > td:last-child {
+  background-color: #fcfbf9 !important;
+}
+.t-table .t-table__body tr:hover > td:last-child {
+  background-color: #f2f5fc !important;
+}
+.t-table .t-table__body tr:nth-child(even):hover > td:last-child {
+  background-color: #e9effa !important;
+}
+
+.t-pagination {
+  margin-top: 16px !important;
+  padding: 0 4px !important;
+}
+
+.t-card__body {
+  padding: 20px !important;
+}
+
+.t-table-row-advanced {
+  margin-bottom: 16px !important;
+}
+
+/* ============================================================
+   适老化触控目标：WCAG 2.5.5 AAA 要求 44×44 CSS px，
+   TDesign 默认 button 在表格里只有 24px，阿姨大叔点不准。
+   表格内文字按钮 / 图标按钮下放到 32px（表格行高 44px 的现实约束），
+   主操作按钮、菜单项保持 ≥44px。
+   ============================================================ */
+
+/* 表格内：图标按钮、文字按钮 — 32×32 最小触控 */
+.t-table .t-button--text,
+.t-table .t-button--variant-text,
+.t-table .icon-actions__btn {
+  min-height: 32px !important;
+  min-width: 32px !important;
+  padding: 6px 10px !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* 表格行内：默认行高提到 44px，避免点错邻行 */
+.t-table .t-table__body > tr > td {
+  height: 44px !important;
+}
+
+/* ============================================================
+   可达性：键盘焦点必须看得见（墨蓝描边，不用浏览器默认蓝）
+   覆盖：交互元素（button / input / a / menu / 卡片）+ 可聚焦的 div（tabindex）
+   ============================================================ */
+.t-button:focus-visible,
+.t-input__inner:focus-visible,
+.t-select-input:focus-visible,
+.t-menu__item:focus-visible,
+.t-table__row:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.12);
+}
+
+/* 侧栏菜单键盘焦点（深底上用亮蓝描边，与 hover 区隔） */
+.t-default-menu .t-menu__item:focus-visible {
+  outline-color: var(--skin-active-bar) !important;
+  outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================================
+   滚动条：默认透明，hover 容器时淡显
+   ============================================================ */
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(26, 29, 36, 0.14);
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 29, 36, 0.24);
+}
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+*:hover {
+  scrollbar-color: rgba(26, 29, 36, 0.14) transparent;
+}

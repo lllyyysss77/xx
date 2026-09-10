@@ -35,6 +35,7 @@ export const MENU_CONFIG: IMenuGroup[] = [
     items: [
       { icon: '📄', title: '提案审批', path: '/election/proposals' },
       { icon: '📋', title: '选举活动管理', path: '/election/activities' },
+      { icon: '📅', title: '倒排工期表', path: '/election/schedule' },
     ],
   },
   // 办理中（工作流第2步）

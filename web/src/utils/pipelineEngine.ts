@@ -15,10 +15,19 @@ export interface StageDefinition {
 }
 
 /**
- * 法定 14 阶段日程基线定义（村/社区双轨）
+ * 法定 16 阶段日程基线定义（村/社区双轨）
  * 村：选民登记 4 天 (-33 ~ -30)
  * 居：居民登记 5 天 (-33 ~ -29)
  */
+// ============================================================
+// [TAG-INDEX] pipelineEngine.ts — 日程流水线引擎（死代码，无任何调用）
+// [TODO-FIX P2] 整套文件无任何 import 调用（grep 全项目无引用），属于死代码
+// [TODO-FIX P2] stage_01~14 命名与后端 stage_key 体系（stage_committee/voter_list 等语义化 key）不符
+// [CORE-FLOW]    L22  STAGE_SOP_RULES — 村/居 16 阶段 SOP 规则定义
+// [CORE-FLOW]    L60  calculateSopCalendar — 按 D 日计算日程
+// [CORE-FLOW]    L94  renderLegalTemplate — 法定模板渲染
+// 状态：待确认是否删除（若确认无调用则删除以减维护成本）
+// ============================================================
 export const STAGE_SOP_RULES: Record<OrgType, StageDefinition[]> = {
   village: [
     { stageKey: 'stage_01', stageName: '推选产生村选举委员会', offset: -35, duration: 2, order: 1, description: '召开村民会议或村民代表会议推选产生' },

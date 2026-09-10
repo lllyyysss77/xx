@@ -55,6 +55,8 @@ declare module 'tdesign-react' {
   export const Form: any;
   export const Input: any;
   export const DatePicker: any;
+  export const DateRangePicker: any;
+  export const DateRangePickerPanel: any;
   export const Select: any;
   export const InputNumber: any;
   export const Space: any;
