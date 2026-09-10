@@ -235,7 +235,20 @@ export const fiefFor = async (id: string, req: FastifyRequest, rep: FastifyReply
 };
 
 /** ── 附件统一出入口常量（磁盘存 backend-new/uploads，DB 存 metadata）── */
-export const UPLOAD_DIR = (() => { const d = join(process.cwd(), 'uploads'); mkdirSync(d, { recursive: true }); return d; })();
+export const UPLOAD_DIR = ((): string => {
+  // veFaaS 容器可能对 workdir 不可写（mkdirSync ENOENT），按序回退：
+  // UPLOAD_DIR 环境变量 → cwd/uploads → /tmp/uploads（生产唯一可写目录）
+  const candidates = [
+    process.env.UPLOAD_DIR,
+    join(process.cwd(), 'uploads'),
+    '/tmp/uploads',
+  ].filter(Boolean) as string[];
+  for (const d of candidates) {
+    try { mkdirSync(d, { recursive: true }); return d; } catch { /* 尝试下一个候选目录 */ }
+  }
+  // 全部失败也不阻塞启动：返回默认路径，写失败由请求层兜底报错
+  return join(process.cwd(), 'uploads');
+})();
 export const MIME_BY_EXT: Record<string, string> = {
   '.pdf': 'application/pdf', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
   '.doc': 'application/msword', '.docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
